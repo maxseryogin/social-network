@@ -1,0 +1,103 @@
+{% extends 'messenger/base.html' %}
+
+{% block content %}
+<style>
+    .chat-list-container {
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 20px;
+    }
+
+    .header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+    }
+
+    .chat-item {
+        background: white;
+        border-radius: 8px;
+        padding: 15px;
+        margin-bottom: 10px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        cursor: pointer;
+    }
+
+    .chat-preview {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+    }
+
+    .chat-avatar {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        object-fit: cover;
+    }
+
+    .chat-info {
+        flex-grow: 1;
+    }
+
+    .last-message {
+        color: #666;
+        font-size: 0.9em;
+        margin: 5px 0;
+    }
+
+    .timestamp {
+        color: #999;
+        font-size: 0.8em;
+    }
+
+    .new-chat-btn {
+        background: #0084ff;
+        color: white;
+        padding: 10px 20px;
+        border-radius: 5px;
+        text-decoration: none;
+    }
+</style>
+
+<div class="chat-list-container">
+    <div class="header">
+        <h1>Мои чаты</h1>
+        <a href="{% url 'user_search' %}" class="new-chat-btn">Новый чат</a>
+    </div>
+
+    <div class="chats">
+        {% if chats %}
+            {% for chat in chats %}
+                <div class="chat-item" onclick="location.href='{% url 'chat_detail' chat.id %}'">
+                    {% for user in chat.users.all %}
+                        {% if user != request.user %}
+                            <div class="chat-preview">
+                                {% if user.avatar %}
+                                    <img src="{{ user.avatar.url }}" alt="Avatar" class="chat-avatar">
+                                {% else %}
+                                    <img src="/static/default_avatar.png" alt="Default Avatar" class="chat-avatar">
+                                {% endif %}
+                                <div class="chat-info">
+                                    <h3>{{ user.username }}</h3>
+                                    {% with last_message=chat.messages.last %}
+                                        {% if last_message %}
+                                            <p class="last-message">{{ last_message.content|truncatechars:50 }}</p>
+                                            <span class="timestamp">{{ last_message.timestamp|date:"H:i" }}</span>
+                                        {% endif %}
+                                    {% endwith %}
+                                </div>
+                            </div>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+            {% endfor %}
+        {% else %}
+            <div class="chat-item">
+                <p>У вас пока нет чатов</p>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

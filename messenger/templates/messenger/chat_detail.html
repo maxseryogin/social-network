@@ -1,0 +1,131 @@
+{% extends 'messenger/base.html' %}
+
+{% block content %}
+<style>
+    .chat-container {
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 20px;
+    }
+
+    .chat-header {
+        background: white;
+        padding: 15px;
+        border-radius: 8px 8px 0 0;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        display: flex;
+        align-items: center;
+        gap: 15px;
+    }
+
+    .chat-avatar {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        object-fit: cover;
+    }
+
+    .messages-container {
+        background: white;
+        padding: 20px;
+        border-radius: 0 0 8px 8px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        height: 400px;
+        overflow-y: auto;
+    }
+
+    .message {
+        margin-bottom: 15px;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .message.sent {
+        align-items: flex-end;
+    }
+
+    .message.received {
+        align-items: flex-start;
+    }
+
+    .message-content {
+        padding: 10px 15px;
+        border-radius: 15px;
+        max-width: 70%;
+    }
+
+    .sent .message-content {
+        background: #0084ff;
+        color: white;
+    }
+
+    .received .message-content {
+        background: #e9ecef;
+        color: black;
+    }
+
+    .message-time {
+        font-size: 0.8em;
+        color: #666;
+        margin-top: 5px;
+    }
+
+    .message-form {
+        margin-top: 20px;
+        display: flex;
+        gap: 10px;
+    }
+
+    .message-input {
+        flex-grow: 1;
+        padding: 10px;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+    }
+
+    .send-btn {
+        padding: 10px 20px;
+        background: #0084ff;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+    }
+</style>
+
+<div class="chat-container">
+    <div class="chat-header">
+        {% for user in chat.users.all %}
+            {% if user != request.user %}
+                {% if user.avatar %}
+                    <img src="{{ user.avatar.url }}" alt="Avatar" class="chat-avatar">
+                {% else %}
+                    <img src="/static/default_avatar.png" alt="Default Avatar" class="chat-avatar">
+                {% endif %}
+                <h2>{{ user.username }}</h2>
+            {% endif %}
+        {% endfor %}
+    </div>
+
+    <div class="messages-container">
+        {% for message in messages %}
+            <div class="message {% if message.sender == request.user %}sent{% else %}received{% endif %}">
+                <div class="message-content">
+                    {{ message.content }}
+                </div>
+                <div class="message-time">
+                    {{ message.timestamp|date:"H:i" }}
+                </div>
+            </div>
+        {% empty %}
+            <p class="no-messages">Нет сообщений</p>
+        {% endfor %}
+    </div>
+
+    <form method="post" action="{% url 'send_message' chat.id %}" class="message-form">
+        {% csrf_token %}
+        <input type="text" name="content" placeholder="Введите сообщение..." class="message-input" required>
+        <button type="submit" class="send-btn">Отправить</button>
+    </form>
+</div>
+{% endblock %} 

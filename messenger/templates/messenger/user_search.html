@@ -1,0 +1,104 @@
+{% extends 'messenger/base.html' %}
+
+{% block content %}
+<style>
+    .search-container {
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 20px;
+    }
+
+    .search-form {
+        margin-bottom: 20px;
+    }
+
+    .search-input {
+        padding: 10px;
+        width: 70%;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        margin-right: 10px;
+    }
+
+    .search-btn {
+        padding: 10px 20px;
+        background: #0084ff;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+    }
+
+    .user-list {
+        list-style: none;
+        padding: 0;
+    }
+
+    .user-item {
+        display: flex;
+        align-items: center;
+        padding: 15px;
+        background: white;
+        margin-bottom: 10px;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .user-avatar {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        margin-right: 15px;
+        object-fit: cover;
+    }
+
+    .user-info {
+        flex-grow: 1;
+    }
+
+    .start-chat-btn {
+        background: #0084ff;
+        color: white;
+        padding: 8px 15px;
+        border-radius: 5px;
+        text-decoration: none;
+    }
+</style>
+
+<div class="search-container">
+    <h1>Поиск пользователей</h1>
+    
+    <form method="GET" class="search-form">
+        <input type="text" name="q" placeholder="Введите имя пользователя..." 
+               value="{{ request.GET.q }}" class="search-input">
+        <button type="submit" class="search-btn">Поиск</button>
+    </form>
+
+    <ul class="user-list">
+        {% for user in users %}
+            <li class="user-item">
+                {% if user.avatar %}
+                    <img src="{{ user.avatar.url }}" alt="Avatar" class="user-avatar">
+                {% else %}
+                    <img src="/static/default_avatar.png" alt="Default Avatar" class="user-avatar">
+                {% endif %}
+                <div class="user-info">
+                    <h3>{{ user.username }}</h3>
+                    {% if user.bio %}
+                        <p>{{ user.bio }}</p>
+                    {% endif %}
+                </div>
+                <a href="{% url 'create_chat' user.id %}" class="start-chat-btn">Начать чат</a>
+            </li>
+        {% empty %}
+            <li class="user-item">
+                {% if request.GET.q %}
+                    <p>Пользователи не найдены</p>
+                {% else %}
+                    <p>Введите имя пользователя для поиска</p>
+                {% endif %}
+            </li>
+        {% endfor %}
+    </ul>
+</div>
+{% endblock %} 

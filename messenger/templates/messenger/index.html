@@ -1,0 +1,66 @@
+{% extends 'messenger/base.html' %}
+
+{% block content %}
+<style>
+    .welcome-container {
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 20px;
+        text-align: center;
+    }
+
+    .user-info {
+        margin: 20px 0;
+    }
+
+    .avatar {
+        width: 150px;  /* фиксированная ширина */
+        height: 150px; /* фиксированная высота */
+        border-radius: 50%; /* делаем круглым */
+        object-fit: cover; /* чтобы изображение корректно масштабировалось */
+        border: 2px solid #0084ff;
+    }
+
+    .actions {
+        margin-top: 20px;
+    }
+
+    .auth-buttons {
+        margin-top: 20px;
+    }
+
+    h1 {
+        color: #333;
+        margin-bottom: 30px;
+    }
+
+    h2 {
+        color: #444;
+        margin: 15px 0;
+    }
+</style>
+
+<div class="welcome-container">
+    <h1>Добро пожаловать в Мессенджер</h1>
+    {% if user.is_authenticated %}
+        <div class="user-info">
+            {% if user.avatar %}
+                <img src="{{ user.avatar.url }}" alt="Avatar" class="avatar">
+            {% else %}
+                <img src="/static/default_avatar.png" alt="Default Avatar" class="avatar">
+            {% endif %}
+            <h2>{{ user.username }}</h2>
+            <p>{{ user.bio }}</p>
+        </div>
+        <div class="actions">
+            <a href="{% url 'chat_list' %}" class="btn">Мои чаты</a>
+            <a href="{% url 'user_search' %}" class="btn">Найти пользователей</a>
+        </div>
+    {% else %}
+        <div class="auth-buttons">
+            <a href="{% url 'login' %}" class="btn">Войти</a>
+            <a href="{% url 'register' %}" class="btn">Регистрация</a>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

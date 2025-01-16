@@ -1,0 +1,15 @@
+{% extends 'messenger/base.html' %}
+
+{% block content %}
+<div class="login-form">
+    <h2>Вход в систему</h2>
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit" class="btn">Войти</button>
+    </form>
+    <p>
+        <a href="{% url 'password_reset' %}">Забыли пароль?</a>
+    </p>
+</div>
+{% endblock %}
