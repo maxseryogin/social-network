@@ -1,0 +1,34 @@
+{% for message in messages %}
+    <div class="message {% if message.sender == request.user %}sent{% else %}received{% endif %}" 
+         data-message-id="{{ message.id }}">
+        <div class="message-avatar">
+            {% if message.sender.profile.avatar %}
+                <img src="{{ message.sender.profile.avatar.url }}" alt="Avatar">
+            {% else %}
+                <div class="default-avatar">{{ message.sender.username|first|upper }}</div>
+            {% endif %}
+        </div>
+        <div class="message-content">
+            <div class="message-sender">
+                <a href="{% url 'profile_view' message.sender.id %}">
+                    {{ message.sender.profile.name|default:message.sender.username }}
+                </a>
+            </div>
+            <div class="message-text">{{ message.content }}</div>
+            {% if message.attachment %}
+                <div class="message-attachment">
+                    {% if message.attachment.url|lower|slice:"-4:" in '.jpg,.jpeg,.png,.gif,.webp' %}
+                        <img src="{{ message.attachment.url }}" alt="Attached image" class="message-image">
+                    {% else %}
+                        <a href="{{ message.attachment.url }}" target="_blank">
+                            <i class="fa-solid fa-file"></i> {{ message.attachment.name }}
+                        </a>
+                    {% endif %}
+                </div>
+            {% endif %}
+            <div class="message-time">{{ message.timestamp|date:"H:i" }}</div>
+        </div>
+    </div>
+{% empty %}
+    <p class="no-messages">Нет сообщений</p>
+{% endfor %} 

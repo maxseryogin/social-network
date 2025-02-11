@@ -3,9 +3,12 @@
 <head>
     <title>{% block title %}Мессенджер{% endblock %}</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>
         body {
-            margin: 0;
+            overflow-y: hidden;  /* Скрываем основную полосу прокрутки */
+            height: 100vh;      /* Фиксируем высоту body */
+            margin: 0;          /* Убираем отступы */
             padding: 0;
             font-family: Arial, sans-serif;
             background-color: #f0f2f5;
@@ -32,18 +35,201 @@
             border-radius: 5px;
             margin: 0.5rem;
         }
+
+        .user-profile {
+            padding: 10px;
+            background-color: #f8f9fa;
+            border-bottom: 1px solid #dee2e6;
+        }
+
+        .user-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+
+        .default-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: #007bff;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+        }
+
+        .user-info {
+            flex: 1;
+        }
+
+        .user-name {
+            font-weight: bold;
+            color: #333;
+        }
+
+        .edit-profile-btn,
+        .logout-btn {
+            padding: 5px 10px;
+            text-decoration: none;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        .edit-profile-btn {
+            background-color: #28a745;
+            color: white;
+        }
+
+        .logout-btn {
+            background-color: #dc3545;
+            color: white;
+            margin-left: 10px;
+        }
+
+        .nav-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .profile-section {
+            display: flex;
+            align-items: center;
+        }
+
+        .nav-links {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .logout-form {
+            display: inline;
+            margin: 0;
+        }
+
+        .logout-form button {
+            border: none;
+            cursor: pointer;
+        }
+
+        .user-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 5px 15px;
+            background-color: #f8f9fa;
+            border-radius: 20px;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+
+        .default-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: #007bff;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+        }
+
+        .user-info {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .user-name {
+            font-weight: bold;
+            color: #333;
+        }
+
+        .navbar {
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .chat-container {
+            height: calc(100vh - 140px);
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .messages-container {
+            flex: 1;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            padding: 10px;
+            margin-bottom: 60px;
+            padding-bottom: 100px;
+        }
+
+        .message-input-container {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background-color: white;
+            padding: 10px;
+            border-top: 1px solid #dee2e6;
+            z-index: 1000;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
     </style>
 </head>
 <body>
     <nav class="navbar">
-        <div class="container">
-            <a href="{% url 'index' %}" class="btn">Главная</a>
+        <div class="container nav-container">
             {% if user.is_authenticated %}
-                <a href="{% url 'chat_list' %}" class="btn">Чаты</a>
-                <a href="{% url 'logout' %}" class="btn">Выйти</a>
-            {% else %}
-                <a href="{% url 'login' %}" class="btn">Войти</a>
+            <div class="profile-section">
+                <div class="user-item">
+                    {% if user.profile and user.profile.avatar %}
+                        <img src="{{ user.profile.avatar.url }}" alt="Avatar" class="user-avatar">
+                    {% else %}
+                        <div class="default-avatar">{{ user.username|first|upper }}</div>
+                    {% endif %}
+                    <div class="user-info">
+                        <span class="user-name">{% if user.profile.name %}{{ user.profile.name }}{% else %}{{ user.username }}{% endif %}</span>
+                    </div>
+                </div>
+            </div>
             {% endif %}
+            
+            <div class="nav-links">
+                <a href="{% url 'index' %}" class="btn">Главная</a>
+                {% if user.is_authenticated %}
+                    <a href="{% url 'chat_list' %}" class="btn">Чаты</a>
+                    <a href="{% url 'profile_edit' %}" class="btn">Редактировать профиль</a>
+                    <form method="post" action="{% url 'logout' %}" class="logout-form">
+                        {% csrf_token %}
+                        <button type="submit" class="btn logout-btn">Выйти</button>
+                    </form>
+                {% else %}
+                    <a href="{% url 'login' %}" class="btn">Войти</a>
+                {% endif %}
+            </div>
         </div>
     </nav>
 
@@ -51,5 +237,16 @@
         {% block content %}
         {% endblock %}
     </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const messagesContainer = document.querySelector('.messages-container');
+            
+            if (messagesContainer) {
+                // Просто прокручиваем в самый низ
+                messagesContainer.scrollTop = messagesContainer.scrollHeight;
+            }
+        });
+    </script>
 </body>
 </html> 

@@ -63,6 +63,31 @@
         border-radius: 5px;
         text-decoration: none;
     }
+
+    .default-avatar {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        background-color: #007bff;
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 24px;
+    }
+
+    .user-name {
+        text-decoration: none;
+        color: black;
+    }
+
+    .btn {
+        background-color: #0084ff;
+        color: white;
+        padding: 8px 15px;
+        border-radius: 5px;
+        text-decoration: none;
+    }
 </style>
 
 <div class="search-container">
@@ -77,18 +102,17 @@
     <ul class="user-list">
         {% for user in users %}
             <li class="user-item">
-                {% if user.avatar %}
-                    <img src="{{ user.avatar.url }}" alt="Avatar" class="user-avatar">
+                {% if user.profile.avatar %}
+                    <img src="{{ user.profile.avatar.url }}" alt="Avatar" class="user-avatar">
                 {% else %}
-                    <img src="/static/default_avatar.png" alt="Default Avatar" class="user-avatar">
+                    <div class="default-avatar">{{ user.username|first|upper }}</div>
                 {% endif %}
                 <div class="user-info">
-                    <h3>{{ user.username }}</h3>
-                    {% if user.bio %}
-                        <p>{{ user.bio }}</p>
-                    {% endif %}
+                    <a href="{% url 'profile_view' user.id %}" class="user-name">
+                        {{ user.profile.name|default:user.username }}
+                    </a>
                 </div>
-                <a href="{% url 'create_chat' user.id %}" class="start-chat-btn">Начать чат</a>
+                <a href="{% url 'create_chat' user.id %}" class="btn">Написать сообщение</a>
             </li>
         {% empty %}
             <li class="user-item">

@@ -14,10 +14,10 @@
     }
 
     .avatar {
-        width: 150px;  /* фиксированная ширина */
-        height: 150px; /* фиксированная высота */
-        border-radius: 50%; /* делаем круглым */
-        object-fit: cover; /* чтобы изображение корректно масштабировалось */
+        width: 150px;
+        height: 150px;
+        border-radius: 50%;
+        object-fit: cover;
         border: 2px solid #0084ff;
     }
 
@@ -55,6 +55,7 @@
         <div class="actions">
             <a href="{% url 'chat_list' %}" class="btn">Мои чаты</a>
             <a href="{% url 'user_search' %}" class="btn">Найти пользователей</a>
+            <a href="{% url 'profile_edit' %}" class="btn">Редактировать профиль</a>
         </div>
     {% else %}
         <div class="auth-buttons">

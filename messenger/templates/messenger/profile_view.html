@@ -1,0 +1,123 @@
+{% extends 'messenger/base.html' %}
+
+{% block content %}
+<div class="profile-container">
+    <div class="profile-header">
+        {% if profile.avatar %}
+            <img src="{{ profile.avatar.url }}" alt="Avatar" class="profile-avatar">
+        {% else %}
+            <div class="default-avatar">{{ profile.user.username|first|upper }}</div>
+        {% endif %}
+        
+        <div class="profile-info">
+            <h2>{{ profile.name|default:profile.user.username }}</h2>
+            {% if profile.description %}
+                <p class="description">{{ profile.description }}</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="user-status" data-user-id="{{ profile_user.id }}">
+        <span id="online-status-{{ profile_user.id }}">{{ profile.get_last_seen }}</span>
+    </div>
+
+    {% if request.user == profile.user %}
+        <a href="{% url 'profile_edit' %}" class="btn edit-btn">Редактировать профиль</a>
+    {% else %}
+        <a href="{% url 'create_chat' profile.user.id %}" class="btn">Написать сообщение</a>
+    {% endif %}
+</div>
+
+<style>
+.profile-container {
+    max-width: 800px;
+    margin: 20px auto;
+    padding: 20px;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.profile-header {
+    display: flex;
+    align-items: start;
+    gap: 20px;
+    margin-bottom: 20px;
+}
+
+.profile-avatar {
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.default-avatar {
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    background-color: #007bff;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 48px;
+}
+
+.profile-info {
+    flex: 1;
+}
+
+.description {
+    margin-top: 10px;
+    white-space: pre-wrap;
+}
+
+.btn {
+    display: inline-block;
+    padding: 10px 20px;
+    background-color: #007bff;
+    color: white;
+    text-decoration: none;
+    border-radius: 4px;
+    margin-top: 10px;
+}
+
+.edit-btn {
+    background-color: #28a745;
+}
+
+.online-status {
+    color: green;
+    font-weight: bold;
+}
+
+.offline-status {
+    color: gray;
+}
+</style>
+
+<script>
+function updateOnlineStatus() {
+    const statusElements = document.querySelectorAll('.user-status');
+    
+    statusElements.forEach(element => {
+        const userId = element.dataset.userId;
+        fetch(`/get_user_status/${userId}/`)
+            .then(response => response.json())
+            .then(data => {
+                const statusSpan = document.getElementById(`online-status-${userId}`);
+                if (statusSpan) {
+                    statusSpan.textContent = data.status;
+                }
+            });
+    });
+}
+
+// Обновляем статус каждые 30 секунд
+setInterval(updateOnlineStatus, 30000);
+
+// Также обновляем статус при получении нового сообщения
+document.addEventListener('newMessage', updateOnlineStatus);
+</script>
+{% endblock %} 

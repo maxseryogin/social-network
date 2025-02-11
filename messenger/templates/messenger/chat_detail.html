@@ -3,10 +3,13 @@
 {% block content %}
 <style>
     .chat-container {
-        max-width: 800px;
-        margin: 0 auto;
-        padding: 20px;
-    }
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    height: 80vh; /* Можно настроить под ваш дизайн */
+}
 
     .chat-header {
         background: white;
@@ -26,12 +29,18 @@
     }
 
     .messages-container {
-        background: white;
-        padding: 20px;
-        border-radius: 0 0 8px 8px;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        height: 400px;
-        overflow-y: auto;
+    flex-grow: 1;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column-reverse;
+    padding: 10px;
+    margin-bottom: 10px;
+    padding-bottom: 60px; /* Оставляет место под поле ввода */
+}
+
+    /* Скрываем полосу прокрутки для Chrome, Safari и Opera */
+    .messages-container::-webkit-scrollbar {
+        display: none;
     }
 
     .message {
@@ -74,6 +83,76 @@
         margin-top: 20px;
         display: flex;
         gap: 10px;
+        align-items: center;
+    }
+
+    .file-input-container {
+        position: relative;
+        display: flex;
+        align-items: center;
+    }
+
+    .file-input {
+        display: none;
+    }
+
+    .file-label {
+        cursor: pointer;
+        padding: 10px;
+        color: #0084ff;
+        font-size: 1.2em;
+    }
+
+    .file-label:hover {
+        color: #0056b3;
+        transition: color 0.2s ease;
+    }
+
+    .attached-file-name {
+        font-size: 0.8em;
+        color: #666;
+        margin-left: 10px;
+    }
+
+    /* Стили для отображения прикрепленных файлов в сообщениях */
+    .message-attachment {
+        margin-top: 5px;
+    }
+
+    .message-image {
+        max-width: 300px;
+        max-height: 300px;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: transform 0.2s;
+    }
+
+    .message-image:hover {
+        transform: scale(1.05);
+    }
+
+    /* Стили для модального окна с полноразмерным изображением */
+    .modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.9);
+        z-index: 1000;
+        cursor: pointer;
+    }
+
+    .modal-content {
+        max-width: 90%;
+        max-height: 90%;
+        margin: auto;
+        display: block;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
     }
 
     .message-input {
@@ -90,6 +169,116 @@
         border: none;
         border-radius: 5px;
         cursor: pointer;
+    }
+
+    .message-avatar img,
+    .message-avatar .default-avatar {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        object-fit: cover;
+    }
+
+    .message-avatar .default-avatar {
+        background-color: #007bff;
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 16px;
+    }
+
+    .message {
+        display: flex;
+        align-items: start;
+        margin-bottom: 15px;
+        gap: 10px;
+    }
+    .message-input-container {
+    position: sticky;
+    bottom: 0;
+    background: white;
+    padding: 10px;
+    border-top: 1px solid #ddd;
+}
+
+    /* Стили для контекстного меню */
+    .context-menu {
+        display: none;
+        position: fixed;
+        background: white;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        z-index: 1000;
+        min-width: 150px;
+    }
+
+    .context-menu-item {
+        padding: 8px 12px;
+        cursor: pointer;
+        transition: background 0.2s;
+        display: flex;
+        align-items: center;
+        color: #333;
+    }
+
+    .context-menu-item:hover {
+        background: #f0f0f0;
+    }
+
+    .context-menu-item i {
+        margin-right: 8px;
+        width: 16px;
+    }
+
+    /* Стили для модального окна редактирования */
+    .edit-modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+        z-index: 1001;
+    }
+
+    .edit-modal-content {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background: white;
+        padding: 20px;
+        border-radius: 8px;
+        min-width: 300px;
+    }
+
+    .edit-modal textarea {
+        width: 100%;
+        min-height: 100px;
+        margin: 10px 0;
+        padding: 8px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+    }
+
+    .edit-modal button {
+        padding: 8px 16px;
+        background: #0084ff;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+    }
+
+    .edit-modal .close {
+        position: absolute;
+        right: 10px;
+        top: 10px;
+        cursor: pointer;
+        font-size: 20px;
     }
 </style>
 
@@ -109,23 +298,228 @@
 
     <div class="messages-container">
         {% for message in messages %}
-            <div class="message {% if message.sender == request.user %}sent{% else %}received{% endif %}">
-                <div class="message-content">
-                    {{ message.content }}
+            <div class="message {% if message.sender == request.user %}sent{% else %}received{% endif %}" 
+                 data-message-id="{{ message.id }}">
+                <div class="message-avatar">
+                    {% if message.sender.profile.avatar %}
+                        <img src="{{ message.sender.profile.avatar.url }}" alt="Avatar">
+                    {% else %}
+                        <div class="default-avatar">{{ message.sender.username|first|upper }}</div>
+                    {% endif %}
                 </div>
-                <div class="message-time">
-                    {{ message.timestamp|date:"H:i" }}
+                <div class="message-content">
+                    <div class="message-sender">
+                        <a href="{% url 'profile_view' message.sender.id %}">
+                            {{ message.sender.profile.name|default:message.sender.username }}
+                        </a>
+                    </div>
+                    <div class="message-text">{{ message.content }}</div>
+                    {% if message.attachment %}
+                        <div class="message-attachment">
+                            {% if message.attachment.url|lower|slice:"-4:" in '.jpg,.jpeg,.png,.gif,.webp' %}
+                                <img src="{{ message.attachment.url }}" alt="Attached image" class="message-image">
+                            {% else %}
+                                <a href="{{ message.attachment.url }}" target="_blank">
+                                    <i class="fa-solid fa-file"></i> {{ message.attachment.name }}
+                                </a>
+                            {% endif %}
+                        </div>
+                    {% endif %}
+                    <div class="message-time">{{ message.timestamp|date:"H:i" }}</div>
                 </div>
             </div>
         {% empty %}
             <p class="no-messages">Нет сообщений</p>
         {% endfor %}
     </div>
+</div>
 
-    <form method="post" action="{% url 'send_message' chat.id %}" class="message-form">
+<!-- Добавляем контекстное меню -->
+<div class="context-menu" id="messageContextMenu">
+    <div class="context-menu-item edit-message">
+        <i class="fas fa-edit"></i>
+        <span>Изменить</span>
+    </div>
+    <div class="context-menu-item delete-message">
+        <i class="fas fa-trash"></i>
+        <span>Удалить</span>
+    </div>
+</div>
+
+<!-- Добавляем модальное окно для редактирования -->
+<div class="edit-modal" id="editMessageModal">
+    <div class="edit-modal-content">
+        <span class="close">&times;</span>
+        <h2>Редактировать сообщение</h2>
+        <form id="editMessageForm">
+            <textarea id="editMessageText"></textarea>
+            <button type="submit">Сохранить</button>
+        </form>
+    </div>
+</div>
+
+<div class="message-input-container">
+    <form method="post" action="{% url 'send_message' chat.id %}" class="message-form" enctype="multipart/form-data">
         {% csrf_token %}
+        <div class="file-input-container">
+            <label for="file-input" class="file-label">
+                <i class="fa-solid fa-file"></i>
+            </label>
+            <input type="file" id="file-input" name="attachment" class="file-input">
+            <span class="attached-file-name"></span>
+        </div>
         <input type="text" name="content" placeholder="Введите сообщение..." class="message-input" required>
         <button type="submit" class="send-btn">Отправить</button>
     </form>
 </div>
+
+<script>
+    setInterval(function() {
+        fetch('/chat/{{ chat.id }}/messages/')
+            .then(response => response.json())
+            .then(data => {
+                document.querySelector('.messages-container').innerHTML = data.messages_html;
+            });
+    }, 3000);
+
+    document.querySelector('.message-form').onsubmit = function(e) {
+        e.preventDefault();
+        
+        const formData = new FormData(this);
+        fetch(this.action, {
+            method: 'POST',
+            body: formData
+        }).then(() => {
+            document.querySelector('.message-input').value = '';
+            fetch('/chat/{{ chat.id }}/messages/')
+                .then(response => response.json())
+                .then(data => {
+                    document.querySelector('.messages-container').innerHTML = data.messages_html;
+                });
+        });
+    };
+
+    document.getElementById('file-input').addEventListener('change', function(e) {
+        const fileName = e.target.files[0]?.name;
+        document.querySelector('.attached-file-name').textContent = fileName || '';
+    });
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const messageInput = document.querySelector('.message-input');
+        const messageForm = document.querySelector('.message-form');
+        const contextMenu = document.getElementById('messageContextMenu');
+        const editModal = document.getElementById('editMessageModal');
+        let currentMessageId = null;
+
+        const savedMessage = localStorage.getItem('savedMessage');
+        if (savedMessage) {
+            messageInput.value = savedMessage;
+        }
+
+        messageInput.addEventListener('input', function() {
+            localStorage.setItem('savedMessage', messageInput.value);
+        });
+
+        messageForm.addEventListener('submit', function() {
+            localStorage.removeItem('savedMessage');
+        });
+
+        document.addEventListener('click', function(e) {
+            if (!contextMenu.contains(e.target)) {
+                contextMenu.style.display = 'none';
+            }
+        });
+
+        document.querySelector('.edit-modal .close').addEventListener('click', function() {
+            editModal.style.display = 'none';
+        });
+
+        document.querySelector('.delete-message').addEventListener('click', function() {
+            if (confirm('Вы уверены, что хотите удалить это сообщение?')) {
+                fetch(`/message/${currentMessageId}/delete/`, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': getCookie('csrftoken')
+                    }
+                }).then(response => {
+                    if (response.ok) {
+                        location.reload();
+                    }
+                });
+            }
+            contextMenu.style.display = 'none';
+        });
+
+        document.querySelector('.edit-message').addEventListener('click', function() {
+            const messageElement = document.querySelector(`[data-message-id="${currentMessageId}"]`);
+            const messageText = messageElement.querySelector('.message-text').textContent;
+            
+            document.getElementById('editMessageText').value = messageText;
+            editModal.style.display = 'block';
+            contextMenu.style.display = 'none';
+        });
+
+        document.getElementById('editMessageForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const newText = document.getElementById('editMessageText').value;
+
+            fetch(`/message/${currentMessageId}/edit/`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCookie('csrftoken')
+                },
+                body: JSON.stringify({
+                    content: newText
+                })
+            }).then(response => {
+                if (response.ok) {
+                    location.reload();
+                }
+            });
+        });
+
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+
+        document.addEventListener('contextmenu', function(e) {
+            const messageElement = e.target.closest('.message');
+            if (messageElement && messageElement.classList.contains('sent')) {
+                e.preventDefault();
+                currentMessageId = messageElement.dataset.messageId;
+                
+                contextMenu.style.display = 'block';
+                let x = e.pageX;
+                let y = e.pageY;
+                
+                const menuWidth = contextMenu.offsetWidth;
+                const menuHeight = contextMenu.offsetHeight;
+                const windowWidth = window.innerWidth;
+                const windowHeight = window.innerHeight;
+                
+                if (x + menuWidth > windowWidth) {
+                    x = windowWidth - menuWidth;
+                }
+                if (y + menuHeight > windowHeight) {
+                    y = windowHeight - menuHeight;
+                }
+                
+                contextMenu.style.left = x + 'px';
+                contextMenu.style.top = y + 'px';
+            }
+        });
+    });
+</script>
 {% endblock %} 

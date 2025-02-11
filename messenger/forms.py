@@ -1,5 +1,6 @@
 from django import forms
-from .models import User
+from .models import User, Profile
+from django.contrib.auth.models import User
 
 class SimpleRegisterForm(forms.ModelForm):
     password = forms.CharField(widget=forms.PasswordInput())
@@ -14,3 +15,11 @@ class SimpleRegisterForm(forms.ModelForm):
         if commit:
             user.save()
         return user 
+
+class UserProfileForm(forms.ModelForm):
+    class Meta:
+        model = Profile
+        fields = ['name', 'avatar', 'description']
+        widgets = {
+            'description': forms.Textarea(attrs={'rows': 4}),
+        } 

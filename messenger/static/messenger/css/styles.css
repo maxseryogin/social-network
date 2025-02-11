@@ -1,0 +1,43 @@
+.online-status {
+    color: green;
+    font-weight: bold;
+}
+
+.offline-status {
+    color: gray;
+}
+
+.message-container {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+
+.message-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.message-content {
+    display: flex;
+    flex-direction: column;
+}
+
+.message-header {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+}
+
+.message-username {
+    margin: 0;
+    font-weight: bold;
+}
+
+.message-time {
+    color: #666;
+    font-size: 0.8em;
+} 
