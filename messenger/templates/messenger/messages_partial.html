@@ -14,11 +14,20 @@
                     {{ message.sender.profile.name|default:message.sender.username }}
                 </a>
             </div>
+            {% if message.reply_to %}
+                <div class="reply-info" data-reply-id="{{ message.reply_to.id }}">
+                    ↪️ {{ message.reply_to.sender.username }}: {{ message.reply_to.content|truncatechars:50 }}
+                </div>
+            {% endif %}
             <div class="message-text">{{ message.content }}</div>
             {% if message.attachment %}
                 <div class="message-attachment">
                     {% if message.attachment.url|lower|slice:"-4:" in '.jpg,.jpeg,.png,.gif,.webp' %}
-                        <img src="{{ message.attachment.url }}" alt="Attached image" class="message-image">
+                        <img src="{{ message.attachment.url }}?v={{ message.timestamp|date:'U' }}" alt="Attached image" class="message-image">
+                    {% elif message.attachment.url|lower|slice:"-3:" == 'mp4' or message.attachment.url|lower|slice:"-4:" in '.mov,.webm' %}
+                        <video src="{{ message.attachment.url }}?v={{ message.timestamp|date:'U' }}" class="message-video" preload="metadata">
+                            Your browser does not support the video tag.
+                        </video>
                     {% else %}
                         <a href="{{ message.attachment.url }}" target="_blank">
                             <i class="fa-solid fa-file"></i> {{ message.attachment.name }}

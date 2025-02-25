@@ -3,12 +3,17 @@ from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from .models import Chat, Message, User, Profile
 from django.db.models import Q
-from .forms import SimpleRegisterForm, UserProfileForm
+from .forms import CustomUserCreationForm, UserProfileForm
 from django.contrib.auth import logout, login
 from django.contrib.auth.forms import UserCreationForm
 from django.views.decorators.http import require_POST
 import json
 from django.template.loader import render_to_string
+from channels.layers import get_channel_layer
+from asgiref.sync import async_to_sync
+from django.urls import reverse
+from django.middleware.csrf import get_token
+from django.views.decorators.csrf import ensure_csrf_cookie
 
 def index(request):
     return render(request, 'messenger/index.html')
@@ -33,6 +38,7 @@ def send_message(request, chat_id):
         chat = get_object_or_404(Chat, id=chat_id, users=request.user)
         content = request.POST.get('content')
         attachment = request.FILES.get('attachment')
+        reply_to_id = request.POST.get('reply_to')
 
         if content or attachment:
             message = Message.objects.create(
@@ -42,11 +48,33 @@ def send_message(request, chat_id):
             
             if attachment:
                 message.attachment = attachment
-                message.save()
                 
+            if reply_to_id:
+                try:
+                    reply_to_message = Message.objects.get(id=reply_to_id)
+                    message.reply_to = reply_to_message
+                except Message.DoesNotExist:
+                    pass
+                
+            message.save()
             chat.messages.add(message)
-            return redirect('chat_detail', chat_id=chat_id)
-    return redirect('chat_detail', chat_id=chat_id)
+
+            # Отправляем уведомление всем пользователям чата, кроме отправителя
+            channel_layer = get_channel_layer()
+            for user in chat.users.exclude(id=request.user.id):
+                async_to_sync(channel_layer.group_send)(
+                    f"user_{user.id}",
+                    {
+                        "type": "notification",
+                        "sender_name": request.user.username,
+                        "sender_avatar": request.user.profile.avatar.url if request.user.profile.avatar else None,
+                        "message": content[:50] + "..." if len(content) > 50 else content,
+                        "chat_id": chat_id
+                    }
+                )
+            
+            return JsonResponse({'status': 'success'})
+    return JsonResponse({'status': 'error'}, status=400)
 
 @login_required
 def create_chat(request, user_id):
@@ -66,21 +94,38 @@ def create_chat(request, user_id):
 def user_search(request):
     query = request.GET.get('q', '')
     users = User.objects.filter(
-        Q(username__icontains=query) | Q(name__icontains=query)
-    ).exclude(id=request.user.id).select_related('profile')
+        Q(username__icontains=query) | 
+        Q(profile__name__icontains=query)  # Ищем по имени в профиле
+    ).exclude(id=request.user.id).select_related('profile').distinct()
     return render(request, 'messenger/user_search.html', {'users': users})
 
+@ensure_csrf_cookie  # This ensures the CSRF cookie is always set
 def register(request):
     if request.method == 'POST':
-        form = UserCreationForm(request.POST)
+        form = CustomUserCreationForm(request.POST)
         if form.is_valid():
             user = form.save()
-            Profile.objects.get_or_create(user=user)
             login(request, user)
+            
+            # If it's an AJAX request, return JSON response
+            if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                return JsonResponse({'status': 'success', 'redirect': '/'})
             return redirect('index')
+        else:
+            # If it's an AJAX request, return form errors
+            if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                return JsonResponse({'status': 'error', 'errors': form.errors})
     else:
-        form = UserCreationForm()
-    return render(request, 'registration/register.html', {'form': form})
+        form = CustomUserCreationForm()
+    
+    # Get and print CSRF token for debugging
+    csrf_token = get_token(request)
+    print("Current CSRF Token:", csrf_token)
+    
+    return render(request, 'registration/register.html', {
+        'form': form,
+        'csrf_token': csrf_token
+    })
 
 def logout_view(request):
     logout(request)
@@ -94,7 +139,7 @@ def profile_edit(request):
         form = UserProfileForm(request.POST, request.FILES, instance=profile)
         if form.is_valid():
             form.save()
-            return redirect('index')
+            return redirect('main')
     else:
         form = UserProfileForm(instance=profile)
     
@@ -139,12 +184,14 @@ def edit_message(request, message_id):
 
 @login_required
 def get_user_status(request, user_id):
-    try:
-        user = User.objects.get(id=user_id)
-        status = user.profile.get_last_seen()
-        return JsonResponse({'status': status})
-    except User.DoesNotExist:
-        return JsonResponse({'status': 'Пользователь не найден'}, status=404)
+    user = get_object_or_404(User, id=user_id)
+    is_online = user.profile.is_online()
+    status = "В сети" if is_online else user.profile.get_last_seen()
+    
+    return JsonResponse({
+        'status': status,
+        'is_online': is_online
+    })
 
 @login_required
 def get_messages(request, chat_id):
@@ -157,3 +204,6 @@ def get_messages(request, chat_id):
     })
     
     return JsonResponse({'messages_html': messages_html})
+
+def main_view(request):
+    return render(request, 'messenger/index.html')

@@ -1,15 +1,99 @@
 {% extends 'messenger/base.html' %}
 
 {% block content %}
-<div class="login-form">
+<style>
+    .auth-container {
+        max-width: 400px;
+        margin: 40px auto;
+        padding: 20px;
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .auth-container h2 {
+        color: #000;
+        text-align: center;
+        margin-bottom: 20px;
+    }
+
+    .auth-form {
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+    }
+
+    .auth-form p {
+        margin: 0;
+    }
+
+    .auth-form label {
+        display: block;
+        margin-bottom: 5px;
+        color: #333;
+    }
+
+    .auth-form input {
+        width: 100%;
+        padding: 10px;
+        border: 1px solid #ddd;
+        border-radius: 20px;
+        font-size: 14px;
+    }
+
+    .auth-form input:focus {
+        outline: none;
+        border-color: #0084ff;
+    }
+
+    .auth-form button {
+        background: #0084ff;
+        color: white;
+        padding: 12px;
+        border: none;
+        border-radius: 20px;
+        cursor: pointer;
+        font-size: 16px;
+        transition: background 0.2s;
+    }
+
+    .auth-form button:hover {
+        background: #0056b3;
+    }
+
+    .auth-links {
+        text-align: center;
+        margin-top: 15px;
+    }
+
+    .auth-links a {
+        color: #0084ff;
+        text-decoration: none;
+    }
+
+    .auth-links a:hover {
+        text-decoration: underline;
+    }
+
+    .errorlist {
+        color: #dc3545;
+        list-style: none;
+        padding: 0;
+        margin: 5px 0;
+        font-size: 14px;
+    }
+</style>
+
+<div class="auth-container">
     <h2>Вход в систему</h2>
-    <form method="post">
+    <form method="post" class="auth-form">
         {% csrf_token %}
         {{ form.as_p }}
-        <button type="submit" class="btn">Войти</button>
+        <button type="submit">Войти</button>
     </form>
-    <p>
-        <a href="{% url 'password_reset' %}">Забыли пароль?</a>
-    </p>
+    <div class="auth-links">
+        <p><a href="{% url 'password_reset' %}">Забыли пароль?</a></p>
+        <p>Нет аккаунта? <a href="{% url 'register' %}">Зарегистрироваться</a></p>
+    </div>
 </div>
 {% endblock %}

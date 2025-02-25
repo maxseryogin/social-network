@@ -28,6 +28,7 @@ class Message(models.Model):
     content = models.TextField()
     timestamp = models.DateTimeField(auto_now_add=True)
     attachment = models.FileField(upload_to='message_attachments/', null=True, blank=True)
+    reply_to = models.ForeignKey('self', null=True, blank=True, on_delete=models.SET_NULL)
 
     def __str__(self):
         return f"Message from {self.sender.username} at {self.timestamp}"
@@ -35,8 +36,9 @@ class Message(models.Model):
 class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     avatar = models.ImageField(upload_to='avatars/', null=True, blank=True)
+    bio = models.TextField(blank=True)
     description = models.TextField(max_length=500, blank=True)
-    name = models.CharField(max_length=100, blank=True)
+    name = models.CharField(max_length=100, blank=True, default='')
     last_activity = models.DateTimeField(auto_now=True)
 
     def __str__(self):

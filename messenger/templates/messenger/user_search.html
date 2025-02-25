@@ -94,7 +94,7 @@
     <h1>Поиск пользователей</h1>
     
     <form method="GET" class="search-form">
-        <input type="text" name="q" placeholder="Введите имя пользователя..." 
+        <input type="text" name="q" placeholder="Введите имя или никнейм пользователя..." 
                value="{{ request.GET.q }}" class="search-input">
         <button type="submit" class="search-btn">Поиск</button>
     </form>
@@ -110,6 +110,9 @@
                 <div class="user-info">
                     <a href="{% url 'profile_view' user.id %}" class="user-name">
                         {{ user.profile.name|default:user.username }}
+                        {% if user.profile.name and user.profile.name != user.username %}
+                            <small>({{ user.username }})</small>
+                        {% endif %}
                     </a>
                 </div>
                 <a href="{% url 'create_chat' user.id %}" class="btn">Написать сообщение</a>
@@ -119,7 +122,7 @@
                 {% if request.GET.q %}
                     <p>Пользователи не найдены</p>
                 {% else %}
-                    <p>Введите имя пользователя для поиска</p>
+                    <p>Введите имя или никнейм пользователя для поиска</p>
                 {% endif %}
             </li>
         {% endfor %}

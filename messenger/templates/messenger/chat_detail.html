@@ -2,18 +2,67 @@
 
 {% block content %}
 <style>
+    body {
+        margin: 0;
+        padding: 0;
+        height: 100vh;
+        overflow: hidden;
+    }
+
     .chat-container {
-    max-width: 800px;
-    margin: 0 auto;
-    padding: 20px;
-    display: flex;
-    flex-direction: column;
-    height: 80vh; /* Можно настроить под ваш дизайн */
-}
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 20px;
+        display: flex;
+        flex-direction: column;
+        height: calc(100vh - 140px);
+        position: relative;
+        min-width: 300px;
+    }
+
+    /* Добавляем медиа-запрос для мобильных устройств */
+    @media screen and (max-width: 768px) {
+        
+        .chat-container {
+            max-width: 100%;
+            width: 100%;
+            height: calc(100vh - 140px);
+            padding: 10px;
+            margin: 0;
+        }
+
+        .messages-container {
+            margin-bottom: 80px;
+        }
+
+        .message-input-container {
+            max-width: 100%;
+            border-radius: 0;
+            padding: 15px;
+        }
+
+        .message-input {
+            height: 45px;
+            font-size: 16px;
+            padding: 12px 15px;
+        }
+
+        .send-btn {
+            padding: 12px 25px;
+            font-size: 16px;
+        }
+
+        #replyContainer {
+            width: 100%;
+            left: 0;
+            transform: none;
+            padding: 0;
+        }
+    }
 
     .chat-header {
         background: white;
-        padding: 15px;
+        padding: 10px 15px;
         border-radius: 8px 8px 0 0;
         box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         display: flex;
@@ -22,21 +71,20 @@
     }
 
     .chat-avatar {
-        width: 40px;
-        height: 40px;
+        width: 35px;
+        height: 35px;
         border-radius: 50%;
         object-fit: cover;
     }
 
     .messages-container {
-    flex-grow: 1;
-    overflow-y: auto;
-    display: flex;
-    flex-direction: column-reverse;
-    padding: 10px;
-    margin-bottom: 10px;
-    padding-bottom: 60px; /* Оставляет место под поле ввода */
-}
+        flex-grow: 1;
+        overflow-y: auto;
+        display: flex;
+        flex-direction: column-reverse;
+        padding: 10px;
+        margin-bottom: 80px;
+    }
 
     /* Скрываем полосу прокрутки для Chrome, Safari и Opera */
     .messages-container::-webkit-scrollbar {
@@ -47,6 +95,7 @@
         margin-bottom: 15px;
         display: flex;
         flex-direction: column;
+        transition: background-color 0.3s ease;
     }
 
     .message.sent {
@@ -146,7 +195,7 @@
 
     .modal-content {
         max-width: 90%;
-        max-height: 90%;
+        max-height: 90vh;
         margin: auto;
         display: block;
         position: absolute;
@@ -159,7 +208,9 @@
         flex-grow: 1;
         padding: 10px;
         border: 1px solid #ddd;
-        border-radius: 5px;
+        border-radius: 20px;
+        background: #384756;
+        color: white;
     }
 
     .send-btn {
@@ -194,13 +245,91 @@
         margin-bottom: 15px;
         gap: 10px;
     }
+
     .message-input-container {
-    position: sticky;
-    bottom: 0;
-    background: white;
-    padding: 10px;
-    border-top: 1px solid #ddd;
-}
+        position: fixed;
+        bottom: 0;
+        left: 50%;
+        transform: translateX(-50%);
+        background: #384756;
+        padding: 10px;
+        border-top: 1px solid #ddd;
+        z-index: 100;
+        max-width: 800px;
+        width: 100%;
+        border-radius: 10px;
+        margin: 0 auto;
+    }
+
+    #replyContainer {
+        position: fixed;
+        bottom: 80px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: white;
+        padding: 0 10px;
+        z-index: 99;
+        width: 800px;
+        max-width: 100%;
+    }
+
+    .reply-preview {
+        background-color: #f0f8ff;
+        border-left: 4px solid #0084ff;
+        padding: 8px 12px;
+        margin-bottom: 5px;
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        border-radius: 4px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+
+    .reply-content {
+        flex-grow: 1;
+    }
+
+    .reply-to {
+        color: #0084ff;
+        font-weight: bold;
+        margin-bottom: 4px;
+        display: block;
+    }
+
+    .reply-text {
+        color: #666;
+        margin: 0;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .close-reply {
+        background: none;
+        border: none;
+        color: #666;
+        cursor: pointer;
+        padding: 0 4px;
+    }
+
+    .close-reply:hover {
+        color: #333;
+    }
+
+    .reply-info {
+        font-size: 0.8em;
+        color: #0084ff;
+        margin-bottom: 4px;
+        padding: 4px 8px;
+        background-color: rgba(0, 132, 255, 0.1);
+        border-radius: 4px;
+        cursor: pointer;
+    }
+
+    .message.sent .reply-info {
+        color: #fff;
+        background-color: rgba(255, 255, 255, 0.2);
+    }
 
     /* Стили для контекстного меню */
     .context-menu {
@@ -280,18 +409,197 @@
         cursor: pointer;
         font-size: 20px;
     }
+
+    /* Обновляем стили для видео-модального окна */
+    .video-modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.9);
+        z-index: 1000;
+    }
+
+    .video-modal-content {
+        position: relative;
+        width: 100%;
+        height: 100%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    #modalVideo {
+        max-width: 90vw;
+        max-height: 90vh;
+        object-fit: contain;
+    }
+
+    /* Стили для превью видео в сообщении */
+    .message-video {
+        max-width: 300px;
+        max-height: 300px;
+        border-radius: 8px;
+        cursor: pointer;
+    }
+
+    /* Стили для кнопки закрытия */
+    .close-video {
+        position: absolute;
+        top: -30px;
+        right: -30px;
+        color: #fff;
+        font-size: 24px;
+        cursor: pointer;
+        background: none;
+        border: none;
+        padding: 5px;
+    }
+
+    .modal-buttons {
+        display: flex;
+        gap: 10px;
+        justify-content: flex-end;
+        margin-top: 20px;
+    }
+
+    .delete-btn {
+        background: #dc3545;
+        color: white;
+        border: none;
+        padding: 8px 16px;
+        border-radius: 4px;
+        cursor: pointer;
+    }
+
+    .cancel-btn {
+        background: #6c757d;
+        color: white;
+        border: none;
+        padding: 8px 16px;
+        border-radius: 4px;
+        cursor: pointer;
+    }
+
+    .delete-btn:hover {
+        background: #c82333;
+    }
+
+    .cancel-btn:hover {
+        background: #5a6268;
+    }
+
+    .user-info {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    
+    .user-details {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+    }
+    
+    .user-details h2 {
+        margin: 0;
+        font-size: 16px;
+        color: #000;
+    }
+    
+    .last-seen {
+        font-size: 12px;
+        color: #666;
+        margin: 0;
+    }
+
+    /* Add specific style for highlighted message */
+    .message.highlight {
+        background-color: rgba(0, 132, 255, 0.1) !important;  /* Light blue background */
+        border-radius: 8px;
+        padding: 10px;
+    }
+
+    .online {
+        color: #2ecc71;
+    }
+    
+    .offline {
+        color: #95a5a6;
+    }
+
+    /* Добавляем новые стили для гамбургер-меню */
+    .hamburger-menu {
+        display: none;
+    }
+
+    .hamburger-menu span {
+        display: none;
+    }
+
+    .mobile-nav {
+        display: none;
+    }
+
+    .mobile-nav.active {
+        display: none;
+    }
+
+    .mobile-nav a {
+        display: none;
+    }
+
+    .hamburger-menu.active span:nth-child(1) {
+        display: none;
+    }
+
+    .hamburger-menu.active span:nth-child(2) {
+        display: none;
+    }
+
+    .hamburger-menu.active span:nth-child(3) {
+        display: none;
+    }
+
+    @media screen and (max-width: 768px) {
+        .hamburger-menu {
+            display: none;
+        }
+
+        .mobile-nav {
+            display: none;
+        }
+
+        /* Показываем обычное меню на мобильных */
+        .desktop-nav {
+            display: block;
+        }
+    }
 </style>
 
 <div class="chat-container">
     <div class="chat-header">
         {% for user in chat.users.all %}
             {% if user != request.user %}
-                {% if user.avatar %}
-                    <img src="{{ user.avatar.url }}" alt="Avatar" class="chat-avatar">
-                {% else %}
-                    <img src="/static/default_avatar.png" alt="Default Avatar" class="chat-avatar">
-                {% endif %}
-                <h2>{{ user.username }}</h2>
+                <div class="user-info">
+                    {% if user.profile.avatar %}
+                        <img src="{{ user.profile.avatar.url }}" alt="Avatar" class="chat-avatar">
+                    {% else %}
+                        <img src="/static/default_avatar.png" alt="Default Avatar" class="chat-avatar">
+                    {% endif %}
+                    <div class="user-details">
+                        <h2 style="color: #000;">{{ user.profile.name|default:user.username }}</h2>
+                        <div class="user-status" data-user-id="{{ user.id }}">
+                            {% if user.profile.is_online %}
+                                <span id="online-status-{{ user.id }}" class="online">В сети</span>
+                            {% else %}
+                                <span id="online-status-{{ user.id }}" class="offline">{{ user.profile.get_last_seen }}</span>
+                            {% endif %}
+                        </div>    
+                    </div>
+                </div>
             {% endif %}
         {% endfor %}
     </div>
@@ -313,11 +621,19 @@
                             {{ message.sender.profile.name|default:message.sender.username }}
                         </a>
                     </div>
+                    {% if message.reply_to %}
+                        <div class="reply-info" data-reply-id="{{ message.reply_to.id }}">
+                            ↪️ {{ message.reply_to.sender.username }}: {{ message.reply_to.content|truncatechars:50 }}
+                        </div>
+                    {% endif %}
                     <div class="message-text">{{ message.content }}</div>
                     {% if message.attachment %}
                         <div class="message-attachment">
                             {% if message.attachment.url|lower|slice:"-4:" in '.jpg,.jpeg,.png,.gif,.webp' %}
                                 <img src="{{ message.attachment.url }}" alt="Attached image" class="message-image">
+                            {% elif message.attachment.url|lower|slice:"-3:" == 'mp4' or message.attachment.url|lower|slice:"-4:" in '.mov,.webm' %}
+                                <video src="{{ message.attachment.url }}" class="message-video" preload="metadata" controls>
+                                </video>
                             {% else %}
                                 <a href="{{ message.attachment.url }}" target="_blank">
                                     <i class="fa-solid fa-file"></i> {{ message.attachment.name }}
@@ -334,8 +650,17 @@
     </div>
 </div>
 
+<!-- Добавьте модальное окно для изображений после chat-container -->
+<div id="imageModal" class="modal">
+    <img class="modal-content" id="modalImage">
+</div>
+
 <!-- Добавляем контекстное меню -->
 <div class="context-menu" id="messageContextMenu">
+    <div class="context-menu-item reply-message">
+        <i class="fas fa-reply"></i>
+        <span>Ответить</span>
+    </div>
     <div class="context-menu-item edit-message">
         <i class="fas fa-edit"></i>
         <span>Изменить</span>
@@ -358,9 +683,41 @@
     </div>
 </div>
 
+<!-- Обновляем модальное окно для видео -->
+<div id="videoModal" class="video-modal">
+    <div class="video-modal-content">
+        <button class="close-video">&times;</button>
+        <video id="modalVideo" controls>
+        </video>
+    </div>
+</div>
+
+<!-- Добавьте модальное окно для подтверждения удаления -->
+<div class="edit-modal" id="deleteMessageModal">
+    <div class="edit-modal-content">
+        <span class="close">&times;</span>
+        <h2>Удалить сообщение</h2>
+        <p>Вы уверены, что хотите удалить это сообщение?</p>
+        <div class="modal-buttons">
+            <button id="confirmDelete" class="delete-btn">Удалить</button>
+            <button id="cancelDelete" class="cancel-btn">Отмена</button>
+        </div>
+    </div>
+</div>
+
 <div class="message-input-container">
+    <div id="replyContainer" style="display: none;">
+        <div class="reply-preview">
+            <div class="reply-content">
+                <small class="reply-to"></small>
+                <p class="reply-text"></p>
+            </div>
+            <button class="close-reply">&times;</button>
+        </div>
+    </div>
     <form method="post" action="{% url 'send_message' chat.id %}" class="message-form" enctype="multipart/form-data">
         {% csrf_token %}
+        <input type="hidden" name="reply_to" id="replyToInput">
         <div class="file-input-container">
             <label for="file-input" class="file-label">
                 <i class="fa-solid fa-file"></i>
@@ -368,41 +725,54 @@
             <input type="file" id="file-input" name="attachment" class="file-input">
             <span class="attached-file-name"></span>
         </div>
-        <input type="text" name="content" placeholder="Введите сообщение..." class="message-input" required>
+        <input type="text" name="content" placeholder="Введите сообщение..." class="message-input">
         <button type="submit" class="send-btn">Отправить</button>
     </form>
 </div>
 
 <script>
     setInterval(function() {
+        // Сохраняем текущую позицию прокрутки и расстояние до нижней границы
+        const messagesContainer = document.querySelector('.messages-container');
+        const scrollTop = messagesContainer.scrollTop;
+        const scrollHeight = messagesContainer.scrollHeight;
+        const clientHeight = messagesContainer.clientHeight;
+        const isAtBottom = Math.abs(scrollHeight - clientHeight - scrollTop) < 10;
+
         fetch('/chat/{{ chat.id }}/messages/')
             .then(response => response.json())
             .then(data => {
-                document.querySelector('.messages-container').innerHTML = data.messages_html;
+                messagesContainer.innerHTML = data.messages_html;
+
+                // Проверяем, есть ли сохраненный идентификатор сообщения
+                const replyingToId = localStorage.getItem('replyingToId');
+                if (replyingToId) {
+                    scrollToMessage(replyingToId);
+                    localStorage.removeItem('replyingToId');
+                } else {
+                    // Если пользователь был внизу чата, оставляем его там
+                    // В противном случае восстанавливаем предыдущую позицию
+                    if (isAtBottom) {
+                        messagesContainer.scrollTop = messagesContainer.scrollHeight;
+                    } else {
+                        messagesContainer.scrollTop = scrollTop;
+                    }
+                }
+
+                // Заново инициализируем обработчики для изображений
+                const images = messagesContainer.querySelectorAll('.message-image');
+                images.forEach(image => {
+                    image.addEventListener('click', function(e) {
+                        const modal = document.getElementById('imageModal');
+                        const modalImg = document.getElementById('modalImage');
+                        const messageInputContainer = document.querySelector('.message-input-container');
+                        modal.style.display = "block";
+                        modalImg.src = e.target.src;
+                        messageInputContainer.style.display = "none";
+                    });
+                });
             });
     }, 3000);
-
-    document.querySelector('.message-form').onsubmit = function(e) {
-        e.preventDefault();
-        
-        const formData = new FormData(this);
-        fetch(this.action, {
-            method: 'POST',
-            body: formData
-        }).then(() => {
-            document.querySelector('.message-input').value = '';
-            fetch('/chat/{{ chat.id }}/messages/')
-                .then(response => response.json())
-                .then(data => {
-                    document.querySelector('.messages-container').innerHTML = data.messages_html;
-                });
-        });
-    };
-
-    document.getElementById('file-input').addEventListener('change', function(e) {
-        const fileName = e.target.files[0]?.name;
-        document.querySelector('.attached-file-name').textContent = fileName || '';
-    });
 
     document.addEventListener('DOMContentLoaded', function() {
         const messageInput = document.querySelector('.message-input');
@@ -420,8 +790,39 @@
             localStorage.setItem('savedMessage', messageInput.value);
         });
 
-        messageForm.addEventListener('submit', function() {
-            localStorage.removeItem('savedMessage');
+        const sendButton = document.querySelector('.send-btn');
+
+        // Add touch event listener for mobile
+        sendButton.addEventListener('touchstart', function(e) {
+            e.preventDefault(); // Prevent default behavior
+            messageForm.dispatchEvent(new Event('submit')); // Trigger form submission
+        });
+
+        messageForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(this);
+            fetch(this.action, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-CSRFToken': getCookie('csrftoken')
+                }
+            }).then(() => {
+                // Clear the input fields and reply preview
+                this.querySelector('.message-input').value = '';
+                this.querySelector('#file-input').value = '';
+                this.querySelector('.attached-file-name').textContent = '';
+                replyContainer.style.display = 'none';
+                replyToInput.value = '';
+                
+                // Refresh messages
+                fetch('/chat/{{ chat.id }}/messages/')
+                    .then(response => response.json())
+                    .then(data => {
+                        document.querySelector('.messages-container').innerHTML = data.messages_html;
+                    });
+            });
         });
 
         document.addEventListener('click', function(e) {
@@ -435,19 +836,27 @@
         });
 
         document.querySelector('.delete-message').addEventListener('click', function() {
-            if (confirm('Вы уверены, что хотите удалить это сообщение?')) {
-                fetch(`/message/${currentMessageId}/delete/`, {
-                    method: 'POST',
-                    headers: {
-                        'X-CSRFToken': getCookie('csrftoken')
-                    }
-                }).then(response => {
-                    if (response.ok) {
-                        location.reload();
-                    }
-                });
-            }
+            const deleteModal = document.getElementById('deleteMessageModal');
+            deleteModal.style.display = 'block';
             contextMenu.style.display = 'none';
+        });
+
+        document.getElementById('cancelDelete').addEventListener('click', function() {
+            document.getElementById('deleteMessageModal').style.display = 'none';
+        });
+
+        document.getElementById('confirmDelete').addEventListener('click', function() {
+            fetch(`/message/${currentMessageId}/delete/`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': getCookie('csrftoken')
+                }
+            }).then(response => {
+                if (response.ok) {
+                    document.getElementById('deleteMessageModal').style.display = 'none';
+                    location.reload();
+                }
+            });
         });
 
         document.querySelector('.edit-message').addEventListener('click', function() {
@@ -494,32 +903,277 @@
             return cookieValue;
         }
 
+        let touchTimeout;
+        let isLongPress = false;
+
+        // Обработчик для десктопа
         document.addEventListener('contextmenu', function(e) {
             const messageElement = e.target.closest('.message');
-            if (messageElement && messageElement.classList.contains('sent')) {
+            if (messageElement) {
                 e.preventDefault();
-                currentMessageId = messageElement.dataset.messageId;
-                
-                contextMenu.style.display = 'block';
-                let x = e.pageX;
-                let y = e.pageY;
-                
-                const menuWidth = contextMenu.offsetWidth;
-                const menuHeight = contextMenu.offsetHeight;
-                const windowWidth = window.innerWidth;
-                const windowHeight = window.innerHeight;
-                
-                if (x + menuWidth > windowWidth) {
-                    x = windowWidth - menuWidth;
-                }
-                if (y + menuHeight > windowHeight) {
-                    y = windowHeight - menuHeight;
-                }
-                
-                contextMenu.style.left = x + 'px';
-                contextMenu.style.top = y + 'px';
+                showContextMenu(e, messageElement);
             }
         });
+
+        // Обработчики для мобильных устройств
+        document.addEventListener('touchstart', function(e) {
+            const messageElement = e.target.closest('.message');
+            if (messageElement) {
+                isLongPress = false;
+                touchTimeout = setTimeout(() => {
+                    isLongPress = true;
+                    showContextMenu(e, messageElement);
+                }, 400); // 1 секунда задержки
+            }
+        });
+
+        document.addEventListener('touchend', function(e) {
+            clearTimeout(touchTimeout);
+            if (isLongPress) {
+                e.preventDefault(); // Предотвращаем клик после долгого нажатия
+            }
+        });
+
+        document.addEventListener('touchmove', function(e) {
+            clearTimeout(touchTimeout); // Отменяем таймер при движении пальца
+        });
+
+        // Функция для показа контекстного меню
+        function showContextMenu(e, messageElement) {
+            currentMessageId = messageElement.dataset.messageId;
+            contextMenu.style.display = 'block';
+            
+            // Получаем координаты
+            let x, y;
+            if (e.type.startsWith('touch')) {
+                const touch = e.touches[0] || e.changedTouches[0];
+                x = touch.pageX;
+                y = touch.pageY;
+            } else {
+                x = e.pageX;
+                y = e.pageY;
+            }
+            
+            const menuWidth = contextMenu.offsetWidth;
+            const menuHeight = contextMenu.offsetHeight;
+            const windowWidth = window.innerWidth;
+            const windowHeight = window.innerHeight;
+            
+            // Корректируем позицию меню, чтобы оно не выходило за пределы экрана
+            if (x + menuWidth > windowWidth) {
+                x = windowWidth - menuWidth;
+            }
+            if (y + menuHeight > windowHeight) {
+                y = windowHeight - menuHeight;
+            }
+            
+            contextMenu.style.left = x + 'px';
+            contextMenu.style.top = y + 'px';
+
+            // Показываем/скрываем пункты меню в зависимости от того, чье сообщение
+            const isOwnMessage = messageElement.classList.contains('sent');
+            document.querySelector('.edit-message').style.display = isOwnMessage ? 'flex' : 'none';
+            document.querySelector('.delete-message').style.display = isOwnMessage ? 'flex' : 'none';
+        }
+
+        // Обработчики для кнопок в контекстном меню
+        document.querySelector('.reply-message').addEventListener('touchstart', function(e) {
+            e.preventDefault(); // Предотвращаем стандартное поведение
+            handleReplyMessage();
+        });
+
+        document.querySelector('.edit-message').addEventListener('touchstart', function(e) {
+            e.preventDefault();
+            handleEditMessage();
+        });
+
+        document.querySelector('.delete-message').addEventListener('touchstart', function(e) {
+            e.preventDefault();
+            handleDeleteMessage();
+        });
+
+        // Также сохраняем обработчики для клика (десктоп)
+        document.querySelector('.reply-message').addEventListener('click', handleReplyMessage);
+        document.querySelector('.edit-message').addEventListener('click', handleEditMessage);
+        document.querySelector('.delete-message').addEventListener('click', handleDeleteMessage);
+
+        // Выносим логику в отдельные функции
+        function handleReplyMessage() {
+            const messageElement = document.querySelector(`[data-message-id="${currentMessageId}"]`);
+            const messageText = messageElement.querySelector('.message-text').textContent;
+            const senderName = messageElement.querySelector('.message-sender').textContent.trim();
+
+            replyingToId = currentMessageId;
+            replyToInput.value = currentMessageId;
+            replyContainer.style.display = 'block';
+            
+            const replyPreview = replyContainer.querySelector('.reply-preview');
+            replyPreview.querySelector('.reply-to').textContent = `В ответ ${senderName}`;
+            replyPreview.querySelector('.reply-text').textContent = messageText;
+
+            contextMenu.style.display = 'none';
+            document.querySelector('.message-input').focus();
+        }
+
+        function handleEditMessage() {
+            const messageElement = document.querySelector(`[data-message-id="${currentMessageId}"]`);
+            const messageText = messageElement.querySelector('.message-text').textContent;
+
+            document.getElementById('editMessageText').value = messageText;
+            editModal.style.display = 'block';
+            contextMenu.style.display = 'none';
+        }
+
+        function handleDeleteMessage() {
+            const deleteModal = document.getElementById('deleteMessageModal');
+            deleteModal.style.display = 'block';
+            contextMenu.style.display = 'none';
+        }
+
+        // Обновляем обработчики для видео
+        const videoModal = document.getElementById('videoModal');
+        const modalVideo = document.getElementById('modalVideo');
+        const messageInputContainer = document.querySelector('.message-input-container');
+        const closeVideoBtn = document.querySelector('.close-video');
+
+        // Функция закрытия модального окна с видео
+        function closeVideoModal() {
+            videoModal.style.display = "none";
+            messageInputContainer.style.display = "block";
+            modalVideo.pause();
+            modalVideo.currentTime = 0;
+            modalVideo.src = '';
+        }
+
+        // Обработчик клавиши Escape для всех модальных окон
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                closeVideoModal();
+                imageModal.style.display = "none";
+                messageInputContainer.style.display = "block";
+            }
+        });
+
+        // Обработчик для открытия видео
+        document.querySelector('.messages-container').addEventListener('click', function(e) {
+            if (e.target.classList.contains('message-video')) {
+                e.preventDefault();
+                videoModal.style.display = "flex";
+                modalVideo.src = e.target.src;
+                messageInputContainer.style.display = "none";
+            }
+        });
+
+        // Закрытие видео по клику на крестик или фон
+        videoModal.addEventListener('click', function(e) {
+            if (e.target === videoModal || e.target === closeVideoBtn) {
+                closeVideoModal();
+            }
+        });
+
+        // Обновляем обработчики для изображений
+        const imageModal = document.getElementById('imageModal');
+        const modalImg = document.getElementById('modalImage');
+
+        // Закрытие модального окна с изображением
+        imageModal.addEventListener('click', function() {
+            imageModal.style.display = "none";
+            document.querySelector('.message-input-container').style.display = "block";
+        });
+
+        // Обработчики для изображений в сообщениях
+        document.querySelector('.messages-container').addEventListener('click', function(e) {
+            if (e.target.classList.contains('message-image')) {
+                const modal = document.getElementById('imageModal');
+                const modalImg = document.getElementById('modalImage');
+                const messageInputContainer = document.querySelector('.message-input-container');
+                modal.style.display = "block";
+                modalImg.src = e.target.src;
+                messageInputContainer.style.display = "none";
+            }
+        });
+
+        let replyingToId = null;
+        const replyContainer = document.getElementById('replyContainer');
+        const replyToInput = document.getElementById('replyToInput');
+
+        // Добавляем обработчик для кнопки "Ответить"
+        document.querySelector('.reply-message').addEventListener('click', function() {
+            const messageElement = document.querySelector(`[data-message-id="${currentMessageId}"]`);
+            const messageText = messageElement.querySelector('.message-text').textContent;
+            const senderName = messageElement.querySelector('.message-sender').textContent.trim();
+
+            replyingToId = currentMessageId;
+            replyToInput.value = currentMessageId;
+            replyContainer.style.display = 'block';
+            
+            const replyPreview = replyContainer.querySelector('.reply-preview');
+            replyPreview.querySelector('.reply-to').textContent = `В ответ ${senderName}`;
+            replyPreview.querySelector('.reply-text').textContent = messageText;
+            
+            contextMenu.style.display = 'none';
+            document.querySelector('.message-input').focus();
+        });
+
+        // Обработчик для закрытия превью ответа
+        const closeReplyBtn = document.querySelector('.close-reply');
+        closeReplyBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            replyContainer.style.display = 'none';
+            replyToInput.value = '';
+            replyingToId = null;
+        });
+
+        // Обработчик для клика по информации об ответе
+        document.querySelector('.messages-container').addEventListener('click', function(e) {
+            if (e.target.classList.contains('reply-info')) {
+                const replyId = e.target.dataset.replyId;
+                const replyMessage = document.querySelector(`[data-message-id="${replyId}"]`);
+                if (replyMessage) {
+                    replyMessage.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    replyMessage.classList.add('highlight');
+                    setTimeout(() => {
+                        replyMessage.classList.remove('highlight');
+                    }, 2000);
+                }
+            }
+        });
+
+        // Добавляем обработчик для отображения имени файла
+        const fileInput = document.getElementById('file-input');
+        const fileNameDisplay = document.querySelector('.attached-file-name');
+        
+        fileInput.addEventListener('change', function() {
+            if (this.files.length > 0) {
+                fileNameDisplay.textContent = this.files[0].name;
+            } else {
+                fileNameDisplay.textContent = '';
+            }
+        });
+
+        function updateOnlineStatus() {
+            const statusElements = document.querySelectorAll('.user-status');
+            
+            statusElements.forEach(element => {
+                const userId = element.dataset.userId;
+                fetch(`/get_user_status/${userId}/`)
+                    .then(response => response.json())
+                    .then(data => {
+                        const statusSpan = document.getElementById(`online-status-${userId}`);
+                        if (statusSpan) {
+                            statusSpan.textContent = data.status;
+                            statusSpan.className = data.is_online ? 'online' : 'offline';
+                        }
+                    });
+            });
+        }
+
+        // Обновляем статус каждые 10 секунд
+        setInterval(updateOnlineStatus, 10000);
+
+        // Также обновляем статус при загрузке страницы
+        document.addEventListener('DOMContentLoaded', updateOnlineStatus);
     });
 </script>
 {% endblock %} 

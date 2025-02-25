@@ -26,7 +26,7 @@ SECRET_KEY = 'django-insecure-qx(h3o5r-%(rtk_a_!d*&_%t8dpsir*d!me1a2dkfu3o)-zb(g
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["*"]
 
 
 # Application definition
@@ -144,3 +144,18 @@ CHANNEL_LAYERS = {
         "BACKEND": "channels.layers.InMemoryChannelLayer"
     }
 }
+
+# Add your ngrok URL here
+CSRF_TRUSTED_ORIGINS = [
+    'https://b4c8-176-119-83-33.ngrok-free.app',
+    # Add any other trusted origins here
+]
+
+# Add this setting to ensure cookies are properly set
+CSRF_COOKIE_SAMESITE = 'Lax'
+SESSION_COOKIE_SAMESITE = 'Lax'
+CSRF_COOKIE_SECURE = True
+SESSION_COOKIE_SECURE = True
+
+# If you're still having issues, temporarily set this to False (NOT recommended for production)
+CSRF_COOKIE_HTTPONLY = False
