@@ -14,6 +14,10 @@ from asgiref.sync import async_to_sync
 from django.urls import reverse
 from django.middleware.csrf import get_token
 from django.views.decorators.csrf import ensure_csrf_cookie
+from django.views.decorators.cache import cache_control
+from django.conf import settings
+import os
+from django.http import FileResponse, HttpResponseNotFound
 
 def index(request):
     return render(request, 'messenger/index.html')
@@ -31,6 +35,7 @@ def chat_detail(request, chat_id):
         'chat': chat,
         'messages': messages
     })
+
 
 @login_required
 def send_message(request, chat_id):
@@ -195,15 +200,87 @@ def get_user_status(request, user_id):
 
 @login_required
 def get_messages(request, chat_id):
-    chat = get_object_or_404(Chat, id=chat_id, users=request.user)
-    messages = Message.objects.filter(chats=chat).order_by('-timestamp')
+    chat = get_object_or_404(Chat, id=chat_id)
+    last_message_id = request.GET.get('last_message_id')
+    
+    # Получаем сообщения в правильном порядке (старые внизу, новые сверху)
+    if last_message_id:
+        messages = chat.messages.filter(id__gt=last_message_id).order_by('timestamp')
+    else:
+        messages = chat.messages.all().order_by('timestamp')
+    
+    messages = messages.distinct()
+    
+    if not messages.exists():
+        return JsonResponse({'messages_html': ''})
+    
+    # Переворачиваем порядок сообщений для правильного отображения
+    messages = list(messages)[::-1]
     
     messages_html = render_to_string('messenger/messages_partial.html', {
         'messages': messages,
         'request': request
     })
     
-    return JsonResponse({'messages_html': messages_html})
+    return JsonResponse({
+        'messages_html': messages_html,
+        'last_message_id': messages[0].id if messages else None
+    })
 
 def main_view(request):
     return render(request, 'messenger/index.html')
+
+@login_required
+def get_new_messages(request, chat_id, last_message_id):
+    new_messages = Message.objects.filter(
+        chat_id=chat_id,
+        id__gt=last_message_id
+    ).order_by('-timestamp')
+    # Вернуть только новые сообщения
+
+
+@cache_control(max_age=86400, public=True)  # Cache for 24 hours
+def serve_image(request, path):
+    # Construct the full path to the image
+    full_path = os.path.join(settings.MEDIA_ROOT, path)
+    
+    # Check if file exists and is within MEDIA_ROOT
+    if os.path.exists(full_path) and full_path.startswith(settings.MEDIA_ROOT):
+        response = FileResponse(open(full_path, 'rb'))
+        response['Cache-Control'] = 'public, max-age=86400'
+        return response
+    
+    return HttpResponseNotFound('Image not found')
+
+@login_required
+def chat_media_gallery(request, chat_id):
+    chat = get_object_or_404(Chat, id=chat_id, users=request.user)
+    
+    # Получаем все сообщения с вложениями
+    messages_with_attachments = Message.objects.filter(
+        chats=chat,
+        attachment__isnull=False
+    ).order_by('-timestamp')
+    
+    # Разделяем файлы по типам
+    images = []
+    videos = []
+    audio = []
+    
+    for message in messages_with_attachments:
+        file_extension = os.path.splitext(message.attachment.name)[1].lower()
+        
+        # Определяем тип файла по расширению
+        if file_extension in ['.jpg', '.jpeg', '.png', '.gif']:
+            images.append(message)
+        elif file_extension in ['.mp4', '.avi', '.mov']:
+            videos.append(message)
+        elif file_extension in ['.mp3', '.wav', '.ogg']:
+            audio.append(message)
+
+    return render(request, 'messenger/chat_gallery.html', {
+        'chat': chat,
+        'images': images,
+        'videos': videos,
+        'audio': audio
+    })

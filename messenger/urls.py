@@ -20,4 +20,5 @@ urlpatterns = [
     path('message/<int:message_id>/delete/', views.delete_message, name='delete_message'),
     path('get_user_status/<int:user_id>/', views.get_user_status, name='get_user_status'),
     path('chat/<int:chat_id>/messages/', views.get_messages, name='get_messages'),
+    path('chat/<int:chat_id>/gallery/', views.chat_media_gallery, name='chat_media_gallery'),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

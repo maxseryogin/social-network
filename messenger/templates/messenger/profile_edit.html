@@ -45,12 +45,32 @@
 
             <div class="form-group">
                 <label for="{{ form.avatar.id_for_label }}">Аватар:</label>
-                <div class="custom-file-input">
-                    <label class="file-upload-btn" for="{{ form.avatar.id_for_label }}">Выберите файл</label>
-                    {{ form.avatar }}
-                    <span class="file-name" id="file-name">Файл не выбран</span>
+                <div class="avatar-upload-container">
+                    <div class="custom-file-input">
+                        <label class="file-upload-btn" for="{{ form.avatar.id_for_label }}">Выберите файл</label>
+                        {{ form.avatar }}
+                    </div>
+                    
+                    {% if user.profile.avatar %}
+                    <div class="current-file">
+                        <div class="current-file-info">
+                            <span class="current-label">Текущий файл:</span>
+                            <span class="current-filename">{{ user.profile.avatar.name }}</span>
+                        </div>
+                        <div class="file-actions">
+                            <label class="clear-checkbox">
+                                <input type="checkbox" name="avatar-clear" id="avatar-clear">
+                                <span>Удалить</span>
+                            </label>
+                        </div>
+                    </div>
+                    {% endif %}
+                    
+                    <div class="new-file-info">
+                        <span class="new-file-label">Новый файл:</span>
+                        <span class="file-name">Файл не выбран</span>
+                    </div>
                 </div>
-                {{ form.avatar.errors }}
             </div>
 
             <div class="form-group">
@@ -67,13 +87,39 @@
 </div>
 
 <style>
+/* Добавляем в начало стилей */
+html, body {
+    margin: 0;
+    padding: 0;
+    min-height: 100%;
+    width: 100%;
+    overflow-x: hidden;
+    overflow-y: auto; /* Разрешаем вертикальную прокрутку */
+}
+
 .edit-profile-container {
     display: flex;
     gap: 30px;
     max-width: 1200px;
     margin: 0 auto;
     padding: 20px;
+    min-height: calc(100vh - 40px); /* Учитываем padding */
 }
+
+@media screen and (max-width: 768px) {
+    .edit-profile-container {
+        flex-direction: column;
+        padding: 10px;
+        gap: 15px;
+        min-height: calc(100vh - 20px); /* Учитываем padding для мобильных */
+    }
+}
+
+/* Удалите или закомментируйте эти свойства, если они есть */
+/* body {
+    position: relative;
+    overflow-y: hidden;
+} */
 
 .profile-preview {
     flex: 1;
@@ -170,38 +216,77 @@
     outline: none;
 }
 
-.custom-file-input {
-    position: relative;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    width: 100%;
+.avatar-upload-container {
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 10px;
+    background: #f8f9fa;
 }
 
-.custom-file-input input[type="file"] {
-    display: none;
+.custom-file-input {
+    margin-bottom: 10px;
 }
 
 .file-upload-btn {
+    display: block;
     background-color: #007bff;
     color: white;
-    padding: 8px 16px;
+    padding: 8px;
     border-radius: 6px;
+    text-align: center;
     cursor: pointer;
-    transition: background-color 0.3s ease;
+    transition: background-color 0.3s;
 }
 
-.file-upload-btn:hover {
-    background-color: #0056b3;
+.current-file {
+    border-bottom: 1px solid #ddd;
+    padding-bottom: 10px;
+    margin-bottom: 10px;
+}
+
+.current-file-info {
+    margin-bottom: 5px;
+}
+
+.current-label {
+    font-weight: 500;
+    color: #666;
+    display: block;
+    margin-bottom: 3px;
+}
+
+.current-filename {
+    display: block;
+    word-break: break-all;
+    font-size: 14px;
+    color: #007bff;
+}
+
+.file-actions {
+    display: flex;
+    align-items: center;
+}
+
+.clear-checkbox {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 14px;
+    color: #dc3545;
+    cursor: pointer;
+}
+
+.new-file-info {
+    font-size: 14px;
+}
+
+.new-file-label {
+    color: #666;
+    margin-right: 5px;
 }
 
 .file-name {
-    flex: 1;
-    padding: 8px;
-    border: 2px solid #ddd;
-    border-radius: 6px;
-    background-color: #f8f9fa;
-    color: #666;
+    color: #333;
 }
 
 .btn {
@@ -218,40 +303,76 @@
 .btn:hover {
     background-color: #0056b3;
 }
+
+/* Адаптивные стили для мобильных устройств */
+@media (max-width: 768px) {
+    .edit-profile-container {
+        flex-direction: column;
+        gap: 20px;
+        padding: 10px;
+    }
+
+    .profile-preview,
+    .form-container {
+        padding: 20px;
+    }
+
+    .preview-avatar {
+        width: 100px;
+        height: 100px;
+    }
+
+    .preview-info h3 {
+        font-size: 1.2em;
+    }
+
+    .preview-info p {
+        font-size: 0.9em;
+    }
+
+    .profile-preview h2,
+    .form-container h2 {
+        font-size: 1.2em;
+    }
+
+    .custom-input input,
+    .custom-textarea textarea {
+        font-size: 14px;
+        padding: 8px;
+    }
+
+    .file-upload-btn {
+        padding: 10px;
+        font-size: 14px;
+    }
+
+    .btn {
+        padding: 8px 16px;
+        font-size: 14px;
+    }
+
+    .avatar-upload-container {
+        padding: 8px;
+    }
+
+    .current-file {
+        padding-bottom: 8px;
+        margin-bottom: 8px;
+    }
+}
 </style>
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // Обновление предпросмотра в реальном времени
-    const usernameInput = document.getElementById('{{ form.username.id_for_label }}');
-    const nameInput = document.getElementById('{{ form.name.id_for_label }}');
-    const descriptionInput = document.getElementById('{{ form.description.id_for_label }}');
     const avatarInput = document.getElementById('{{ form.avatar.id_for_label }}');
+    const avatarPreview = document.getElementById('avatar-preview');
     const fileNameDisplay = document.querySelector('.file-name');
-
-    // Обновление имени пользователя
-    usernameInput.addEventListener('input', function() {
-        document.getElementById('preview-username').textContent = this.value || '{{ user.username }}';
-    });
-
-    // Обновление никнейма
-    nameInput.addEventListener('input', function() {
-        const previewName = document.getElementById('preview-name');
-        const value = this.value.trim();
-        previewName.textContent = value || '{{ user.profile.name|default:"" }}';
-    });
-
-    // Обновление описания
-    descriptionInput.addEventListener('input', function() {
-        const previewDescription = document.getElementById('preview-description');
-        const value = this.value.trim();
-        previewDescription.textContent = value || '{{ user.profile.description|default:"" }}';
-    });
 
     // Обновление аватарки
     avatarInput.addEventListener('change', function() {
         if (this.files && this.files[0]) {
             const file = this.files[0];
+            
             // Проверка размера файла (максимум 5MB)
             if (file.size > 5 * 1024 * 1024) {
                 alert('Файл слишком большой. Максимальный размер: 5MB');
@@ -259,6 +380,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 fileNameDisplay.textContent = 'Файл не выбран';
                 return;
             }
+            
             // Проверка типа файла
             if (!file.type.match('image.*')) {
                 alert('Пожалуйста, выберите изображение');
@@ -267,16 +389,33 @@ document.addEventListener('DOMContentLoaded', function() {
                 return;
             }
             
+            // Создаем URL для предпросмотра
             const reader = new FileReader();
             reader.onload = function(e) {
-                document.getElementById('avatar-preview').src = e.target.result;
+                avatarPreview.src = e.target.result;
             };
             reader.readAsDataURL(file);
+            
+            // Обновляем отображение имени файла
             fileNameDisplay.textContent = file.name;
         } else {
+            // Если файл не выбран, возвращаем дефолтную аватарку
+            avatarPreview.src = "{% if user.profile.avatar %}{{ user.profile.avatar.url }}{% else %}/static/messenger/default_avatar.jpg{% endif %}";
             fileNameDisplay.textContent = 'Файл не выбран';
         }
     });
+
+    // Обработка чекбокса очистки аватара
+    const clearCheckbox = document.getElementById('avatar-clear');
+    if (clearCheckbox) {
+        clearCheckbox.addEventListener('change', function() {
+            if (this.checked) {
+                avatarPreview.src = '/static/messenger/default_avatar.jpg';
+            } else {
+                avatarPreview.src = "{% if user.profile.avatar %}{{ user.profile.avatar.url }}{% else %}/static/messenger/default_avatar.jpg{% endif %}";
+            }
+        });
+    }
 });
 </script>
 {% endblock %}

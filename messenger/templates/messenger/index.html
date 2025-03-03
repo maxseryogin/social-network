@@ -1,4 +1,5 @@
 {% extends 'messenger/base.html' %}
+{% load static %}
 
 {% block content %}
 <style>
@@ -7,10 +8,19 @@
         margin: 0 auto;
         padding: 20px;
         text-align: center;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        min-height: 80vh;
     }
 
     .user-info {
         margin: 20px 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
     }
 
     .avatar {
@@ -19,6 +29,8 @@
         border-radius: 50%;
         object-fit: cover;
         border: 2px solid #0084ff;
+        margin: 0 auto;
+        display: block;
     }
 
     .actions {
@@ -44,10 +56,10 @@
     <h1>Добро пожаловать в Мессенджер</h1>
     {% if user.is_authenticated %}
         <div class="user-info">
-            {% if user.avatar %}
-                <img src="{{ user.avatar.url }}" alt="Avatar" class="avatar">
+            {% if user.profile.avatar %}
+                <img src="{{ user.profile.avatar.url }}" alt="Avatar" class="avatar">
             {% else %}
-                <img src="/static/default_avatar.png" alt="Default Avatar" class="avatar">
+                <img src="{% static 'images/default_avatar.png' %}" alt="Default Avatar" class="avatar">
             {% endif %}
             <h2>{{ user.username }}</h2>
             <p>{{ user.bio }}</p>

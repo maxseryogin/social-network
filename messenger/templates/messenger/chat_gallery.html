@@ -1,0 +1,385 @@
+{% extends 'messenger/base.html' %}
+
+{% block content %}
+<div class="gallery-container">
+    <div class="gallery-header">
+        <a href="{% url 'chat_detail' chat.id %}" class="back-button">
+            <i class="fas fa-arrow-left"></i> Назад к чату
+        </a>
+        <h2>Медиафайлы чата</h2>
+    </div>
+    
+    <!-- Вкладки для переключения типов медиа -->
+    <div class="gallery-tabs">
+        <button class="tab-button active" data-tab="images">Изображения</button>
+        <button class="tab-button" data-tab="videos">Видео</button>
+    </div>
+
+    <!-- Галерея изображений -->
+    <div class="gallery-section" id="images">
+        <h3>Изображения</h3>
+        <div class="media-grid">
+            {% for message in images %}
+                <div class="media-item">
+                    <img src="{{ message.attachment.url }}" alt="Image" onclick="openMediaViewer(this.src, 'image')">
+                    <div class="media-info">
+                        <span>{{ message.timestamp|date:"d.m.Y" }}</span>
+                    </div>
+                </div>
+            {% empty %}
+                <p>Нет изображений</p>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Галерея видео -->
+    <div class="gallery-section hidden" id="videos">
+        <h3>Видео</h3>
+        <div class="media-grid">
+            {% for message in videos %}
+                <div class="media-item">
+                    <video onclick="openMediaViewer('{{ message.attachment.url }}', 'video')">
+                        <source src="{{ message.attachment.url }}" type="video/mp4">
+                    </video>
+                    <div class="media-info">
+                        <span>{{ message.timestamp|date:"d.m.Y" }}</span>
+                    </div>
+                </div>
+            {% empty %}
+                <p>Нет видео</p>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Медиа просмотрщик -->
+    <div id="mediaViewer" class="media-viewer">
+        <span class="close-button" onclick="closeMediaViewer(); event.stopPropagation();">&times;</span>
+        <button class="nav-button prev-button" onclick="prevMedia()">❮</button>
+        <button class="nav-button next-button" onclick="nextMedia()">❯</button>
+        <div class="media-viewer-content">
+            <img id="viewerImage" src="" alt="" style="display: none;">
+            <video id="viewerVideo" controls style="display: none;">
+                <source src="" type="video/mp4">
+            </video>
+        </div>
+    </div>
+</div>
+
+<style>
+.gallery-container {
+    padding: 20px;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.gallery-tabs {
+    margin-bottom: 20px;
+}
+
+.tab-button {
+    padding: 10px 20px;
+    margin-right: 10px;
+    border: none;
+    background: #f0f0f0;
+    cursor: pointer;
+}
+
+.tab-button.active {
+    background: #007bff;
+    color: white;
+}
+
+.gallery-section {
+    flex: 1;
+    overflow-y: scroll;
+    padding-right: 10px;
+    margin-bottom: 0;
+}
+
+.media-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 20px;
+    padding-bottom: 20px;
+    /* Добавляем минимальную высоту, чтобы контент всегда был скроллируемым */
+    min-height: calc(100% + 100px);
+}
+
+/* Стилизуем скроллбар для браузеров на основе WebKit */
+.gallery-section::-webkit-scrollbar {
+    width: 8px;
+}
+
+.gallery-section::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 4px;
+}
+
+.gallery-section::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 4px;
+}
+
+.gallery-section::-webkit-scrollbar-thumb:hover {
+    background: #555;
+}
+
+.hidden {
+    display: none;
+}
+
+.media-item {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    height: 200px;
+    background: none;
+}
+
+.media-item img,
+.media-item video {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+    cursor: pointer;
+    display: block;
+}
+
+.media-info {
+    padding: 5px;
+    background: rgba(0,0,0,0.5);
+    color: white;
+    width: 100%;
+    margin-top: -4px;
+}
+
+.media-viewer {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.9);
+    z-index: 1000;
+}
+
+.media-viewer-content {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    max-width: 100%;
+    max-height: 100%;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.media-viewer-content img,
+.media-viewer-content video {
+    max-width: 100%;
+    max-height: 100vh;
+    width: 100%;
+    object-fit: contain;
+}
+
+.close-button {
+    position: absolute;
+    top: 15px;
+    right: 35px;
+    color: #f1f1f1;
+    font-size: 40px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.gallery-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 20px;
+    gap: 20px;
+}
+
+.back-button {
+    display: inline-flex;
+    align-items: center;
+    padding: 8px 16px;
+    background-color: #f0f0f0;
+    border-radius: 4px;
+    color: #333;
+    text-decoration: none;
+    font-weight: 500;
+    transition: background-color 0.2s;
+}
+
+.back-button:hover {
+    background-color: #e0e0e0;
+    text-decoration: none;
+    color: #333;
+}
+
+.back-button i {
+    margin-right: 8px;
+}
+
+/* Добавляем кнопки навигации */
+.nav-button {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(255, 255, 255, 0.3);
+    color: white;
+    padding: 15px;
+    cursor: pointer;
+    font-size: 24px;
+    border: none;
+    z-index: 1001;
+}
+
+.prev-button {
+    left: 10px;
+}
+
+.next-button {
+    right: 10px;
+}
+
+/* Обновляем стили для мобильных устройств */
+@media (max-width: 768px) {
+    .gallery-container {
+        height: calc(100vh - 60px);
+        padding: 10px;
+    }
+    
+    .gallery-section {
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .media-grid {
+        /* Увеличиваем отступ на мобильных */
+        padding-bottom: 100px;
+    }
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const tabs = document.querySelectorAll('.tab-button');
+    
+    tabs.forEach(tab => {
+        tab.addEventListener('click', function() {
+            // Убираем активный класс со всех вкладок
+            tabs.forEach(t => t.classList.remove('active'));
+            // Добавляем активный класс текущей вкладке
+            this.classList.add('active');
+            
+            // Скрываем все секции
+            document.querySelectorAll('.gallery-section').forEach(section => {
+                section.classList.add('hidden');
+            });
+            
+            // Показываем нужную секцию
+            const targetSection = document.getElementById(this.dataset.tab);
+            targetSection.classList.remove('hidden');
+        });
+    });
+});
+
+let currentMediaIndex = 0;
+let mediaArray = [];
+
+function openMediaViewer(src, type) {
+    const viewer = document.getElementById('mediaViewer');
+    const viewerImage = document.getElementById('viewerImage');
+    const viewerVideo = document.getElementById('viewerVideo');
+    
+    // Собираем все медиафайлы текущего типа
+    mediaArray = Array.from(document.querySelectorAll(type === 'image' ? '.media-item img' : '.media-item video'))
+        .map(el => el.src || el.querySelector('source').src);
+    
+    currentMediaIndex = mediaArray.indexOf(src);
+    
+    viewer.style.display = 'block';
+    updateMediaContent(type);
+}
+
+function updateMediaContent(type) {
+    const viewerImage = document.getElementById('viewerImage');
+    const viewerVideo = document.getElementById('viewerVideo');
+    
+    if (type === 'image') {
+        viewerImage.style.display = 'block';
+        viewerVideo.style.display = 'none';
+        viewerImage.src = mediaArray[currentMediaIndex];
+    } else if (type === 'video') {
+        viewerImage.style.display = 'none';
+        viewerVideo.style.display = 'block';
+        viewerVideo.src = mediaArray[currentMediaIndex];
+        viewerVideo.play();
+    }
+}
+
+function nextMedia() {
+    if (currentMediaIndex < mediaArray.length - 1) {
+        currentMediaIndex++;
+        const type = document.querySelector('.tab-button.active').dataset.tab === 'images' ? 'image' : 'video';
+        updateMediaContent(type);
+    }
+}
+
+function prevMedia() {
+    if (currentMediaIndex > 0) {
+        currentMediaIndex--;
+        const type = document.querySelector('.tab-button.active').dataset.tab === 'images' ? 'image' : 'video';
+        updateMediaContent(type);
+    }
+}
+
+// Добавляем обработку свайпов
+let touchStartX = 0;
+let touchEndX = 0;
+
+document.getElementById('mediaViewer').addEventListener('touchstart', e => {
+    touchStartX = e.changedTouches[0].screenX;
+});
+
+document.getElementById('mediaViewer').addEventListener('touchend', e => {
+    touchEndX = e.changedTouches[0].screenX;
+    handleSwipe();
+});
+
+function handleSwipe() {
+    const swipeThreshold = 50;
+    const difference = touchStartX - touchEndX;
+    
+    if (Math.abs(difference) > swipeThreshold) {
+        if (difference > 0) {
+            // Свайп влево
+            nextMedia();
+        } else {
+            // Свайп вправо
+            prevMedia();
+        }
+    }
+}
+
+function closeMediaViewer() {
+    const viewer = document.getElementById('mediaViewer');
+    const viewerVideo = document.getElementById('viewerVideo');
+    
+    viewer.style.display = 'none';
+    viewerVideo.pause();
+}
+
+// Закрытие просмотрщика при нажатии клавиши Esc
+document.addEventListener('keydown', function(event) {
+    if (event.key === 'Escape') {
+        closeMediaViewer();
+    }
+});
+</script>
+{% endblock %} 

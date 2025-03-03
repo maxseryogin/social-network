@@ -28,6 +28,12 @@
     {% endif %}
 </div>
 
+<!-- Модальное окно -->
+<div id="mediaModal" class="media-modal">
+    <span class="close-modal">&times;</span>
+    <img id="modalImage" class="modal-content" src="" alt="Full size image">
+</div>
+
 <style>
 .profile-container {
     max-width: 800px;
@@ -95,29 +101,71 @@
 .offline-status {
     color: gray;
 }
-</style>
 
-<script>
-function updateOnlineStatus() {
-    const statusElements = document.querySelectorAll('.user-status');
-    
-    statusElements.forEach(element => {
-        const userId = element.dataset.userId;
-        fetch(`/get_user_status/${userId}/`)
-            .then(response => response.json())
-            .then(data => {
-                const statusSpan = document.getElementById(`online-status-${userId}`);
-                if (statusSpan) {
-                    statusSpan.textContent = data.status;
-                }
-            });
-    });
+.media-section {
+    margin-top: 20px;
+    padding: 20px;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
-// Обновляем статус каждые 30 секунд
-setInterval(updateOnlineStatus, 30000);
+.media-stats {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+}
 
-// Также обновляем статус при получении нового сообщения
-document.addEventListener('newMessage', updateOnlineStatus);
-</script>
+.media-stat {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 15px;
+    background: #f8f9fa;
+    border-radius: 20px;
+    font-size: 14px;
+}
+
+.media-stat i {
+    color: #007bff;
+}
+
+.media-modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.9);
+    z-index: 1000;
+}
+
+.modal-content {
+    margin: auto;
+    display: block;
+    max-width: 90%;
+    max-height: 90vh;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+.close-modal {
+    position: absolute;
+    top: 15px;
+    right: 35px;
+    color: #f1f1f1;
+    font-size: 40px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+@media (max-width: 768px) {
+    .modal-content {
+        width: 95%;
+    }
+}
+</style>
 {% endblock %} 

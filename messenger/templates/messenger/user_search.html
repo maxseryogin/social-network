@@ -4,8 +4,19 @@
 <style>
     .search-container {
         max-width: 800px;
-        margin: 0 auto;
+        width: 100%;
+        margin: 60px auto 0;
         padding: 20px;
+        min-height: calc(100vh - 60px);
+        overflow-y: auto;
+        box-sizing: border-box;
+    }
+
+    body {
+        margin: 0;
+        padding: 0;
+        min-height: 100vh;
+        overflow-y: auto;
     }
 
     .search-form {
@@ -14,10 +25,12 @@
 
     .search-input {
         padding: 10px;
-        width: 70%;
+        width: calc(70% - 10px);
+        max-width: 100%;
         border: 1px solid #ddd;
         border-radius: 5px;
         margin-right: 10px;
+        box-sizing: border-box;
     }
 
     .search-btn {
@@ -42,6 +55,8 @@
         margin-bottom: 10px;
         border-radius: 8px;
         box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        flex-wrap: wrap;
+        gap: 10px;
     }
 
     .user-avatar {
@@ -88,10 +103,36 @@
         border-radius: 5px;
         text-decoration: none;
     }
+
+    @media (max-width: 600px) {
+        .search-container {
+            padding: 10px;
+        }
+
+        .search-input {
+            width: 100%;
+            margin-right: 0;
+            margin-bottom: 10px;
+        }
+
+        .search-btn {
+            width: 100%;
+        }
+
+        .user-info {
+            width: 100%;
+            margin-bottom: 10px;
+        }
+
+        .btn {
+            width: 100%;
+            text-align: center;
+        }
+    }
 </style>
 
 <div class="search-container">
-    <h1>Поиск пользователей</h1>
+    <h1 style="color: white;">Поиск пользователей</h1>
     
     <form method="GET" class="search-form">
         <input type="text" name="q" placeholder="Введите имя или никнейм пользователя..." 

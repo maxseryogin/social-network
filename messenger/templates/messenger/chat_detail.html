@@ -18,17 +18,17 @@
         height: calc(100vh - 140px);
         position: relative;
         min-width: 300px;
+        box-sizing: border-box; /* Добавляем box-sizing */
     }
 
     /* Добавляем медиа-запрос для мобильных устройств */
     @media screen and (max-width: 768px) {
         
         .chat-container {
-            max-width: 100%;
-            width: 100%;
-            height: calc(100vh - 140px);
             padding: 10px;
             margin: 0;
+            width: 100%;
+            max-width: 100%;
         }
 
         .messages-container {
@@ -36,7 +36,7 @@
         }
 
         .message-input-container {
-            max-width: 100%;
+            width: 100%;
             border-radius: 0;
             padding: 15px;
         }
@@ -68,6 +68,8 @@
         display: flex;
         align-items: center;
         gap: 15px;
+        display: flex;
+        justify-content: space-between;
     }
 
     .chat-avatar {
@@ -110,6 +112,15 @@
         padding: 10px 15px;
         border-radius: 15px;
         max-width: 70%;
+        word-wrap: break-word;
+        overflow-wrap: break-word;
+        overflow: hidden;
+        width: 100%;
+    }
+
+    .message-text {
+        white-space: pre-wrap;
+        word-break: break-word;
     }
 
     .sent .message-content {
@@ -133,12 +144,14 @@
         display: flex;
         gap: 10px;
         align-items: center;
+        flex-wrap: wrap;
     }
 
     .file-input-container {
         position: relative;
         display: flex;
         align-items: center;
+        order: 2;
     }
 
     .file-input {
@@ -166,14 +179,16 @@
     /* Стили для отображения прикрепленных файлов в сообщениях */
     .message-attachment {
         margin-top: 5px;
+        max-width: 100%;
     }
 
     .message-image {
-        max-width: 300px;
-        max-height: 300px;
+        max-width: 100%;
+        height: auto;
         border-radius: 8px;
         cursor: pointer;
         transition: transform 0.2s;
+        display: block;
     }
 
     .message-image:hover {
@@ -205,6 +220,7 @@
     }
 
     .message-input {
+        order: 1;
         flex-grow: 1;
         padding: 10px;
         border: 1px solid #ddd;
@@ -214,12 +230,20 @@
     }
 
     .send-btn {
-        padding: 10px 20px;
+        padding: 10px 15px;
         background: #0084ff;
         color: white;
         border: none;
         border-radius: 5px;
         cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        order: 4;
+    }
+
+    .send-btn i {
+        font-size: 1.2em;
     }
 
     .message-avatar img,
@@ -249,16 +273,105 @@
     .message-input-container {
         position: fixed;
         bottom: 0;
-        left: 50%;
-        transform: translateX(-50%);
+        left: 0;
+        right: 0;
         background: #384756;
         padding: 10px;
         border-top: 1px solid #ddd;
         z-index: 100;
         max-width: 800px;
-        width: 100%;
+        margin: 0 auto; /* Центрируем контейнер */
         border-radius: 10px;
-        margin: 0 auto;
+        box-sizing: border-box;
+    }
+
+    @media screen and (max-width: 768px) {
+        .message-input-container {
+            width: 100%; /* На мобильных занимает всю ширину */
+            border-radius: 0;
+            padding: 15px;
+        }
+    }
+
+    .message-audio {
+        width: 100%;
+        max-width: 300px;
+        margin-top: 5px;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 20px;
+        padding: 10px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    /* Кастомные стили для аудио-плеера */
+    .message-audio audio {
+        width: 100%;
+    }
+
+    /* Стили для аудио-плеера в светлой теме (полученные сообщения) */
+    .received .message-audio audio::-webkit-media-controls-panel {
+        background-color: #f8f9fa;
+    }
+
+    .received .message-audio audio::-webkit-media-controls-current-time-display,
+    .received .message-audio audio::-webkit-media-controls-time-remaining-display {
+        color: #333;
+    }
+
+    /* Стили для аудио-плеера в темной теме (отправленные сообщения) */
+    .sent .message-audio audio::-webkit-media-controls-panel {
+        background-color: #0084ff;
+    }
+
+    .sent .message-audio audio::-webkit-media-controls-current-time-display,
+    .sent .message-audio audio::-webkit-media-controls-time-remaining-display {
+        color: white;
+    }
+
+    /* Стили для голосовых сообщений */
+    .voice-message {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 8px 15px;
+        border-radius: 20px;
+        background: rgba(255, 255, 255, 0.1);
+    }
+
+    .voice-message-icon {
+        font-size: 1.2em;
+        color: #0084ff;
+    }
+
+    .sent .voice-message-icon {
+        color: white;
+    }
+
+    .voice-message-duration {
+        font-size: 0.8em;
+        color: #666;
+    }
+
+    .sent .voice-message-duration {
+        color: rgba(255, 255, 255, 0.8);
+    }
+
+    /* Стили для превью голосового сообщения */
+    .voice-preview {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        background: rgba(255, 255, 255, 0.1);
+        padding: 8px 12px;
+        border-radius: 15px;
+        color: white;
+    }
+
+    .voice-preview i {
+        color: #0084ff;
+        font-size: 1.2em;
     }
 
     #replyContainer {
@@ -439,10 +552,12 @@
 
     /* Стили для превью видео в сообщении */
     .message-video {
-        max-width: 300px;
+        max-width: 100%;
         max-height: 300px;
         border-radius: 8px;
         cursor: pointer;
+        width: 100%;
+        object-fit: contain;
     }
 
     /* Стили для кнопки закрытия */
@@ -576,6 +691,233 @@
         .desktop-nav {
             display: block;
         }
+
+        .message-content {
+            max-width: 85%;
+        }
+
+        .message-image {
+            max-width: 100%;
+            height: auto;
+        }
+
+        .message-attachment {
+            width: 100%;
+            margin: 5px 0;
+        }
+    }
+
+    .voice-record-btn {
+        background: none;
+        border: none;
+        color: #0084ff;
+        cursor: pointer;
+        padding: 10px;
+        font-size: 1.2em;
+        transition: color 0.2s;
+        order: 3;
+    }
+
+    .voice-record-btn:hover {
+        color: #0056b3;
+    }
+
+    .voice-record-btn.recording {
+        color: #dc3545;
+        animation: pulse 1s infinite;
+    }
+
+    .voice-recording-indicator {
+        position: absolute;
+        bottom: 70px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: rgba(0, 0, 0, 0.7);
+        color: white;
+        padding: 8px 16px;
+        border-radius: 20px;
+        font-size: 14px;
+    }
+
+    @keyframes pulse {
+        0% { transform: scale(1); }
+        50% { transform: scale(1.1); }
+        100% { transform: scale(1); }
+    }
+
+    @media screen and (max-width: 768px) {
+        .voice-recording-indicator {
+            bottom: 60px;
+        }
+    }
+
+    .file-preview-container {
+        order: -1;
+        width: 100%;
+        margin-bottom: 10px;
+    }
+
+    .file-preview-container img,
+    .file-preview-container video {
+        max-width: 100%;
+        max-height: 200px;
+        object-fit: contain;
+        border-radius: 4px;
+    }
+
+    .file-preview-container .file-name {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        background: rgba(255, 255, 255, 0.1);
+        padding: 8px 12px;
+        border-radius: 8px;
+        color: white;
+    }
+
+    .gallery-link {
+        padding: 8px 15px;
+        background: #0084ff;
+        color: white;
+        text-decoration: none;
+        border-radius: 20px;
+        font-size: 14px;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        transition: background-color 0.2s;
+    }
+
+    .gallery-link:hover {
+        background: #0056b3;
+        color: white;
+    }
+
+    @media screen and (max-width: 768px) {
+        .gallery-link {
+            padding: 6px 12px;
+            font-size: 12px;
+        }
+    }
+
+    /* Стили для поля ввода сообщения */
+    .message-input-container {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 10px;
+        background: #2b2b2b;
+        border-top: 1px solid #3d3d3d;
+        position: sticky;
+        bottom: 0;
+        width: 100%;
+        box-sizing: border-box;
+    }
+
+    .message-input-wrapper {
+        flex: 1;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        background: #383838;
+        border-radius: 20px;
+        padding: 8px 15px;
+    }
+
+    .message-input {
+        flex: 1;
+        border: none;
+        background: transparent;
+        color: #fff;
+        font-size: 14px;
+        padding: 5px;
+        min-height: 20px;
+        max-height: 100px;
+        resize: none;
+    }
+
+    .message-input:focus {
+        outline: none;
+    }
+
+    .attachment-btn,
+    .voice-record-btn,
+    .send-message-btn {
+        background: transparent;
+        border: none;
+        padding: 8px;
+        cursor: pointer;
+        color: #0084ff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        transition: background-color 0.2s;
+    }
+
+    .attachment-btn:hover,
+    .voice-record-btn:hover,
+    .send-message-btn:hover {
+        background-color: rgba(0, 132, 255, 0.1);
+    }
+
+    .attachment-btn i,
+    .voice-record-btn i,
+    .send-message-btn i {
+        font-size: 20px;
+    }
+
+    /* Мобильные стили */
+    @media (max-width: 768px) {
+        .message-input-container {
+            padding: 8px;
+            gap: 8px;
+        }
+
+        .message-input-wrapper {
+            padding: 6px 12px;
+        }
+
+        .message-input {
+            font-size: 16px; /* Увеличиваем размер шрифта для лучшей читаемости на мобильных */
+            padding: 4px;
+        }
+
+        .attachment-btn,
+        .voice-record-btn,
+        .send-message-btn {
+            padding: 6px;
+        }
+
+        .attachment-btn i,
+        .voice-record-btn i,
+        .send-message-btn i {
+            font-size: 18px;
+        }
+    }
+
+    /* Стили для iPhone SE и других маленьких экранов */
+    @media (max-width: 375px) {
+        .message-input-container {
+            padding: 6px;
+            gap: 6px;
+        }
+
+        .message-input-wrapper {
+            padding: 4px 10px;
+        }
+
+        .attachment-btn,
+        .voice-record-btn,
+        .send-message-btn {
+            padding: 5px;
+        }
+
+        .attachment-btn i,
+        .voice-record-btn i,
+        .send-message-btn i {
+            font-size: 16px;
+        }
     }
 </style>
 
@@ -602,6 +944,11 @@
                 </div>
             {% endif %}
         {% endfor %}
+        
+        <!-- Добавляем ссылку на медиагалерею -->
+        <a href="{% url 'chat_media_gallery' chat.id %}" class="gallery-link">
+            <i class="fas fa-images"></i> Галерея
+        </a>
     </div>
 
     <div class="messages-container">
@@ -628,19 +975,26 @@
                     {% endif %}
                     <div class="message-text">{{ message.content }}</div>
                     {% if message.attachment %}
-                        <div class="message-attachment">
-                            {% if message.attachment.url|lower|slice:"-4:" in '.jpg,.jpeg,.png,.gif,.webp' %}
-                                <img src="{{ message.attachment.url }}" alt="Attached image" class="message-image">
-                            {% elif message.attachment.url|lower|slice:"-3:" == 'mp4' or message.attachment.url|lower|slice:"-4:" in '.mov,.webm' %}
-                                <video src="{{ message.attachment.url }}" class="message-video" preload="metadata" controls>
-                                </video>
-                            {% else %}
-                                <a href="{{ message.attachment.url }}" target="_blank">
-                                    <i class="fa-solid fa-file"></i> {{ message.attachment.name }}
-                                </a>
-                            {% endif %}
-                        </div>
-                    {% endif %}
+    <div class="message-attachment">
+        {% if message.attachment.url|lower|slice:"-4:" in '.jpg,.jpeg,.png,.gif,.webp' %}
+            <img src="{{ message.attachment.url }}" alt="Attached image" class="message-image">
+        {% elif message.attachment.url|lower|slice:"-3:" == 'mp4' or message.attachment.url|lower|slice:"-4:" in '.mov,.webm' %}
+            <video src="{{ message.attachment.url }}" class="message-video" preload="metadata" controls></video>
+        {% elif message.attachment.url|lower|slice:"-4:" in '.mp3,.ogg,.wav,.webm' %}
+            <div class="message-audio">
+                <audio controls>
+                    <source src="{{ message.attachment.url }}" type="audio/{{ message.attachment.url|lower|slice:"-3:" }}">
+                    Ваш браузер не поддерживает аудиоплеер.
+                </audio>
+            </div>
+        {% else %}
+            <a href="{{ message.attachment.url }}" target="_blank">
+                <i class="fa-solid fa-file"></i> {{ message.attachment.name }}
+            </a>
+        {% endif %}
+    </div>
+{% endif %}
+
                     <div class="message-time">{{ message.timestamp|date:"H:i" }}</div>
                 </div>
             </div>
@@ -677,7 +1031,7 @@
         <span class="close">&times;</span>
         <h2>Редактировать сообщение</h2>
         <form id="editMessageForm">
-            <textarea id="editMessageText"></textarea>
+            <input type="text" id="editMessageText"></input>
             <button type="submit">Сохранить</button>
         </form>
     </div>
@@ -723,56 +1077,107 @@
                 <i class="fa-solid fa-file"></i>
             </label>
             <input type="file" id="file-input" name="attachment" class="file-input">
-            <span class="attached-file-name"></span>
+            <div class="file-preview-container"></div>
         </div>
         <input type="text" name="content" placeholder="Введите сообщение..." class="message-input">
-        <button type="submit" class="send-btn">Отправить</button>
+        <button type="button" class="voice-record-btn">
+            <i class="fas fa-microphone"></i>
+        </button>
+        <button type="submit" class="send-btn">
+            <i class="fas fa-paper-plane"></i>
+        </button>
     </form>
+    <div class="voice-recording-indicator" style="display: none;">
+        Идет запись... <span class="recording-time">0:00</span>
+    </div>
 </div>
 
 <script>
-    setInterval(function() {
-        // Сохраняем текущую позицию прокрутки и расстояние до нижней границы
-        const messagesContainer = document.querySelector('.messages-container');
-        const scrollTop = messagesContainer.scrollTop;
-        const scrollHeight = messagesContainer.scrollHeight;
-        const clientHeight = messagesContainer.clientHeight;
-        const isAtBottom = Math.abs(scrollHeight - clientHeight - scrollTop) < 10;
+    let lastMessageId = null;  // Переменная для отслеживания последнего сообщения
+    let existingMessageIds = new Set();  // Множество для хранения ID существующих сообщений
 
-        fetch('/chat/{{ chat.id }}/messages/')
+    // При загрузке страницы собираем ID всех существующих сообщений
+    document.addEventListener('DOMContentLoaded', function() {
+        document.querySelectorAll('.message').forEach(message => {
+            existingMessageIds.add(message.dataset.messageId);
+        });
+        
+        // Устанавливаем lastMessageId из последнего сообщения
+        const messages = document.querySelectorAll('.message');
+        if (messages.length > 0) {
+            lastMessageId = messages[0].dataset.messageId;
+        }
+    });
+
+    setInterval(function() {
+        fetch(`/chat/{{ chat.id }}/messages/?last_message_id=${lastMessageId}`)
             .then(response => response.json())
             .then(data => {
-                messagesContainer.innerHTML = data.messages_html;
-
-                // Проверяем, есть ли сохраненный идентификатор сообщения
-                const replyingToId = localStorage.getItem('replyingToId');
-                if (replyingToId) {
-                    scrollToMessage(replyingToId);
-                    localStorage.removeItem('replyingToId');
-                } else {
-                    // Если пользователь был внизу чата, оставляем его там
-                    // В противном случае восстанавливаем предыдущую позицию
-                    if (isAtBottom) {
-                        messagesContainer.scrollTop = messagesContainer.scrollHeight;
-                    } else {
-                        messagesContainer.scrollTop = scrollTop;
+                if (!data.messages_html) return;
+                
+                const messagesContainer = document.querySelector('.messages-container');
+                const temp = document.createElement('div');
+                temp.innerHTML = data.messages_html;
+                const newMessages = temp.querySelectorAll('.message');
+                
+                newMessages.forEach(message => {
+                    const messageId = message.dataset.messageId;
+                    if (!existingMessageIds.has(messageId)) {
+                        // Добавляем новые сообщения в конец контейнера
+                        messagesContainer.appendChild(message);
+                        existingMessageIds.add(messageId);
+                        
+                        initializeMessageHandlers(message);
+                        
+                        if (!lastMessageId || parseInt(messageId) > parseInt(lastMessageId)) {
+                            lastMessageId = messageId;
+                        }
                     }
-                }
-
-                // Заново инициализируем обработчики для изображений
-                const images = messagesContainer.querySelectorAll('.message-image');
-                images.forEach(image => {
-                    image.addEventListener('click', function(e) {
-                        const modal = document.getElementById('imageModal');
-                        const modalImg = document.getElementById('modalImage');
-                        const messageInputContainer = document.querySelector('.message-input-container');
-                        modal.style.display = "block";
-                        modalImg.src = e.target.src;
-                        messageInputContainer.style.display = "none";
-                    });
                 });
+                
+                // Прокручиваем к последнему сообщению
+                scrollToBottom();
             });
     }, 3000);
+
+    // Вспомогательные функции
+    function isUserAtBottom() {
+        const messagesContainer = document.querySelector('.messages-container');
+        return Math.abs(messagesContainer.scrollHeight - messagesContainer.clientHeight - messagesContainer.scrollTop) < 10;
+    }
+
+    function scrollToBottom() {
+        const messagesContainer = document.querySelector('.messages-container');
+        messagesContainer.scrollTop = messagesContainer.scrollHeight;
+    }
+
+    function initializeMessageHandlers(messageElement) {
+        // Инициализация обработчиков для изображений
+        const images = messageElement.querySelectorAll('.message-image');
+        images.forEach(image => {
+            image.addEventListener('click', function(e) {
+                const modal = document.getElementById('imageModal');
+                const modalImg = document.getElementById('modalImage');
+                const messageInputContainer = document.querySelector('.message-input-container');
+                modal.style.display = "block";
+                modalImg.src = e.target.src;
+                messageInputContainer.style.display = "none";
+            });
+        });
+
+        // Инициализация обработчиков для видео
+        const videos = messageElement.querySelectorAll('.message-video');
+        videos.forEach(video => {
+            video.addEventListener('click', function(e) {
+                const videoModal = document.getElementById('videoModal');
+                const modalVideo = document.getElementById('modalVideo');
+                const messageInputContainer = document.querySelector('.message-input-container');
+                videoModal.style.display = "flex";
+                modalVideo.src = e.target.src;
+                messageInputContainer.style.display = "none";
+            });
+        });
+    }
 
     document.addEventListener('DOMContentLoaded', function() {
         const messageInput = document.querySelector('.message-input');
@@ -812,7 +1217,7 @@
                 // Clear the input fields and reply preview
                 this.querySelector('.message-input').value = '';
                 this.querySelector('#file-input').value = '';
-                this.querySelector('.attached-file-name').textContent = '';
+                this.querySelector('.file-preview-container').innerHTML = '';
                 replyContainer.style.display = 'none';
                 replyToInput.value = '';
                 
@@ -845,7 +1250,17 @@
             document.getElementById('deleteMessageModal').style.display = 'none';
         });
 
-        document.getElementById('confirmDelete').addEventListener('click', function() {
+        document.getElementById('confirmDelete').addEventListener('click', function(e) {
+            e.preventDefault(); // Prevent default behavior
+            handleDeleteConfirmation();
+        });
+
+        document.getElementById('confirmDelete').addEventListener('touchstart', function(e) {
+            e.preventDefault(); // Prevent default behavior
+            handleDeleteConfirmation();
+        });
+
+        function handleDeleteConfirmation() {
             fetch(`/message/${currentMessageId}/delete/`, {
                 method: 'POST',
                 headers: {
@@ -857,7 +1272,7 @@
                     location.reload();
                 }
             });
-        });
+        }
 
         document.querySelector('.edit-message').addEventListener('click', function() {
             const messageElement = document.querySelector(`[data-message-id="${currentMessageId}"]`);
@@ -1074,23 +1489,40 @@
         // Обновляем обработчики для изображений
         const imageModal = document.getElementById('imageModal');
         const modalImg = document.getElementById('modalImage');
+        const imageCache = new Map(); // Кэш для изображений
 
-        // Закрытие модального окна с изображением
-        imageModal.addEventListener('click', function() {
+        // Предварительная загрузка изображений
+        function preloadImage(src) {
+            if (!imageCache.has(src)) {
+                const img = new Image();
+                img.src = src;
+                imageCache.set(src, img);
+            }
+            return imageCache.get(src);
+        }
+
+        // Закрытие изображения по клику в любое место
+        imageModal.addEventListener('click', function(e) {
             imageModal.style.display = "none";
-            document.querySelector('.message-input-container').style.display = "block";
+            messageInputContainer.style.display = "block";
         });
 
         // Обработчики для изображений в сообщениях
         document.querySelector('.messages-container').addEventListener('click', function(e) {
             if (e.target.classList.contains('message-image')) {
-                const modal = document.getElementById('imageModal');
-                const modalImg = document.getElementById('modalImage');
-                const messageInputContainer = document.querySelector('.message-input-container');
-                modal.style.display = "block";
-                modalImg.src = e.target.src;
+                e.preventDefault();
+                const imgSrc = e.target.src;
+                modalImg.src = imgSrc;
+                imageModal.style.display = "block";
                 messageInputContainer.style.display = "none";
             }
+        });
+
+        // Инициализация предварительной загрузки всех изображений при загрузке страницы
+        document.addEventListener('DOMContentLoaded', function() {
+            document.querySelectorAll('.message-image').forEach(img => {
+                preloadImage(img.src);
+            });
         });
 
         let replyingToId = null;
@@ -1142,14 +1574,42 @@
 
         // Добавляем обработчик для отображения имени файла
         const fileInput = document.getElementById('file-input');
-        const fileNameDisplay = document.querySelector('.attached-file-name');
+        const previewContainer = document.querySelector('.file-preview-container');
         
         fileInput.addEventListener('change', function() {
+            previewContainer.innerHTML = ''; // Clear previous preview
+            
             if (this.files.length > 0) {
-                fileNameDisplay.textContent = this.files[0].name;
-            } else {
-                fileNameDisplay.textContent = '';
+                const file = this.files[0];
+                
+                if (file.type.startsWith('image/')) {
+                    // Handle image files
+                    const img = document.createElement('img');
+                    img.src = URL.createObjectURL(file);
+                    previewContainer.appendChild(img);
+                } else if (file.type.startsWith('video/')) {
+                    // Handle video files
+                    const video = document.createElement('video');
+                    video.src = URL.createObjectURL(file);
+                    video.controls = true;
+                    previewContainer.appendChild(video);
+                } else {
+                    // Handle other file types
+                    const fileName = document.createElement('div');
+                    fileName.className = 'file-name';
+                    fileName.textContent = file.name;
+                    previewContainer.appendChild(fileName);
+                }
             }
+        });
+
+        // Clean up object URLs when form is submitted
+        document.querySelector('.message-form').addEventListener('submit', function() {
+            const preview = previewContainer.querySelector('img, video');
+            if (preview) {
+                URL.revokeObjectURL(preview.src);
+            }
+            previewContainer.innerHTML = '';
         });
 
         function updateOnlineStatus() {
@@ -1174,6 +1634,170 @@
 
         // Также обновляем статус при загрузке страницы
         document.addEventListener('DOMContentLoaded', updateOnlineStatus);
+
+        // Обработчики для кнопки отмены удаления
+        document.getElementById('cancelDelete').addEventListener('click', closeDeleteModal);
+        document.getElementById('cancelDelete').addEventListener('touchstart', function(e) {
+            e.preventDefault();
+            closeDeleteModal();
+        });
+
+        // Обработчики для крестика в модальном окне удаления
+        document.querySelector('#deleteMessageModal .close').addEventListener('click', closeDeleteModal);
+        document.querySelector('#deleteMessageModal .close').addEventListener('touchstart', function(e) {
+            e.preventDefault();
+            closeDeleteModal();
+        });
+
+        // Обработчики для крестика в модальном окне редактирования
+        document.querySelector('#editMessageModal .close').addEventListener('click', closeEditModal);
+        document.querySelector('#editMessageModal .close').addEventListener('touchstart', function(e) {
+            e.preventDefault();
+            closeEditModal();
+        });
+
+        // Обработчики для крестика в превью ответа
+        document.querySelector('.close-reply').addEventListener('click', closeReplyPreview);
+        document.querySelector('.close-reply').addEventListener('touchstart', function(e) {
+            e.preventDefault();
+            closeReplyPreview();
+        });
+
+        // Функции закрытия модальных окон
+        function closeDeleteModal() {
+            document.getElementById('deleteMessageModal').style.display = 'none';
+        }
+
+        function closeEditModal() {
+            document.getElementById('editMessageModal').style.display = 'none';
+        }
+
+        function closeReplyPreview() {
+            document.getElementById('replyContainer').style.display = 'none';
+            document.getElementById('replyToInput').value = '';
+            replyingToId = null;
+        }
+
+        // Добавляем обработчики для записи голосовых сообщений
+        const voiceButton = document.querySelector('.voice-record-btn');
+        const recordingIndicator = document.querySelector('.voice-recording-indicator');
+        const recordingTime = document.querySelector('.recording-time');
+        let mediaRecorder = null;
+        let audioChunks = [];
+        let recordingStartTime = null;
+        let recordingTimer = null;
+
+        // Функция для форматирования времени
+        function formatTime(seconds) {
+            const minutes = Math.floor(seconds / 60);
+            seconds = seconds % 60;
+            return `${minutes}:${seconds.toString().padStart(2, '0')}`;
+        }
+
+        // Функция обновления таймера
+        function updateRecordingTime() {
+            const seconds = Math.floor((Date.now() - recordingStartTime) / 1000);
+            recordingTime.textContent = formatTime(seconds);
+        }
+
+        // Функция начала записи
+        async function startRecording() {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                mediaRecorder = new MediaRecorder(stream);
+                audioChunks = [];
+
+                mediaRecorder.ondataavailable = (event) => {
+                    audioChunks.push(event.data);
+                };
+
+                mediaRecorder.onstop = async () => {
+                    const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+                    
+                    // Создаем File объект из Blob
+                    const audioFile = new File([audioBlob], 'voice-message.webm', { type: 'audio/webm' });
+                    
+                    // Создаем новый FileList-подобный объект
+                    const dataTransfer = new DataTransfer();
+                    dataTransfer.items.add(audioFile);
+                    
+                    // Устанавливаем файл в input file
+                    const fileInput = document.querySelector('.file-input');
+                    fileInput.files = dataTransfer.files;
+                    
+                    // Показываем превью голосового сообщения в контейнере
+                    const previewContainer = document.querySelector('.file-preview-container');
+                    previewContainer.innerHTML = `
+                        <div class="voice-preview">
+                            <i class="fas fa-microphone"></i>
+                            <span>Голосовое сообщение</span>
+                        </div>
+                    `;
+                    
+                    // Останавливаем все треки
+                    stream.getTracks().forEach(track => track.stop());
+                };
+
+                mediaRecorder.start();
+                voiceButton.classList.add('recording');
+                recordingIndicator.style.display = 'block';
+                recordingStartTime = Date.now();
+                recordingTimer = setInterval(updateRecordingTime, 1000);
+
+            } catch (error) {
+                console.error('Error accessing microphone:', error);
+                alert('Не удалось получить доступ к микрофону');
+            }
+        }
+
+        // Функция остановки записи
+        function stopRecording() {
+            if (mediaRecorder && mediaRecorder.state === 'recording') {
+                mediaRecorder.stop();
+                voiceButton.classList.remove('recording');
+                recordingIndicator.style.display = 'none';
+                clearInterval(recordingTimer);
+            }
+        }
+
+        // Обработчики для компьютера
+        voiceButton.addEventListener('mousedown', startRecording);
+        document.addEventListener('mouseup', stopRecording);
+
+        // Обработчики для мобильных устройств
+        voiceButton.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            startRecording();
+        });
+        
+        voiceButton.addEventListener('touchend', (e) => {
+            e.preventDefault();
+            stopRecording();
+        });
+
+        // Отменяем запись при уходе со страницы
+        window.addEventListener('beforeunload', stopRecording);
+
+        // Получаем параметры URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const messageId = urlParams.get('message_id');
+        const shouldHighlight = urlParams.get('highlight');
+
+        if (messageId && shouldHighlight) {
+            const messageElement = document.querySelector(`[data-message-id="${messageId}"]`);
+            if (messageElement) {
+                // Прокручиваем к сообщению
+                messageElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                
+                // Добавляем подсветку
+                messageElement.classList.add('highlight');
+                
+                // Убираем подсветку через 2 секунды
+                setTimeout(() => {
+                    messageElement.classList.remove('highlight');
+                }, 2000);
+            }
+        }
     });
 </script>
 {% endblock %} 
