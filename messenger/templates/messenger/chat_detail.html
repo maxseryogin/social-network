@@ -111,11 +111,10 @@
     .message-content {
         padding: 10px 15px;
         border-radius: 15px;
-        max-width: 70%;
+        width: auto;
         word-wrap: break-word;
         overflow-wrap: break-word;
         overflow: hidden;
-        width: 100%;
     }
 
     .message-text {
@@ -183,7 +182,7 @@
     }
 
     .message-image {
-        max-width: 100%;
+        max-width: 300px; /* Устанавливаем максимальную ширину для изображений */
         height: auto;
         border-radius: 8px;
         cursor: pointer;
@@ -919,6 +918,33 @@
             font-size: 16px;
         }
     }
+
+    .date-divider {
+    text-align: center;
+    margin: 20px 0;
+    position: relative;
+}
+
+.date-divider span {
+    background-color: #f0f0f0;
+    padding: 5px 10px;
+    border-radius: 15px;
+    font-size: 0.9em;
+    color: #666;
+    position: relative;
+    z-index: 1;
+}
+
+.date-divider::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background-color: #ddd;
+    z-index: 0;
+}
 </style>
 
 <div class="chat-container">
